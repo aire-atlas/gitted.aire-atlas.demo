@@ -24,6 +24,8 @@ _aire_install()
 
     rm -f /etc/apache2/sites-enabled/000-default
 
+    pear install swift/Swift-4.0.6
+
     [ -d /usr/share/javascript/openlayers-2.11rc3 ] || {
         mkdir -p /usr/share/javascript/openlayers-2.11rc3 || nef_fatal "could not mkdir"
         curl "http://openlayers.org/download/OpenLayers-2.11-rc3.tar.gz" \

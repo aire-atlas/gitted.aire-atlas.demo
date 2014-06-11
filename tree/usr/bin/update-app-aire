@@ -1,0 +1,205 @@
+#!/bin/bash
+#
+# nef-update-aire - install/update of multiple instances of app AIRE
+#
+# AIRE means in French "Interactive Atlas of European Regions
+#
+# Usage: $0 <profile-name>
+#
+# This script installs (if missing) or updates (if present) the AIRE instance
+# for the given name, that should lie into /etc/aire/instances-enabled/
+#
+# Profile options:
+#
+#   APP_AIRE_SOURCE_PATH (mandatory)
+#       Source sync directory
+#
+#
+
+. /usr/lib/sysconf.base/common.sh
+
+
+##################################################
+# DEFAULTS / INITS
+
+APP_AIRE_DEFAULT_CONFIG_FILE=/etc/default/aire
+APP_AIRE_INSTANCE_CONFIG_DIR=/etc/aire/instances-enabled
+APP_AIRE_INSTANCE_BASE_DIR=/var/lib/aire
+APP_AIRE_GIT_UPSTREAM_URL=https://github.com/geonef/aire.git
+APP_AIRE_INSTANCE_GENERATE_APACHE2=yes
+APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=no
+APP_AIRE_APACHE2_CONFIG_PREFIX=generated.app.aire.
+APP_AIRE_APACHE2_CONFIG_SUFFIX=.conf
+
+APP_AIRE_INSTANCE_ENV=test
+APP_AIRE_INSTANCE_CONFIG_EXTRA=""
+
+show_usage()
+{
+    cat <<EOF
+Usage: $0 [-s] INSTANCE
+  where INSTANCE is the lower-case instance name (like "prod", "test", etc.)
+  that will make /etc/aire/instances-enabled/INSTANCE.conf get sourced
+  into the environment.
+
+The whole thing works by using shell/environment variables, which are prefixed
+with "APP_AIRE_" and always upper-case.
+
+- common options lie into the /etc/default/aire using common bash definitions
+- instance-specific options lie into /etc/instances-enabled/INSTANCE.conf
+- options can be given at runtime by setting them as UNIX environment variables,
+  for example:
+    # APP_AIRE_DEFAULT_CONFIG=/usr/local/etc/default/aire nef-update-aire myinstance
+
+NOTE: the AIRE application has system dependencies that are managed automatically
+      by the install.sh script of the "sysconf.app.aire" SYSCONF profile
+      (which means, just run "sysconf update" and it should be automatic).
+
+EOF
+    show_options
+}
+
+show_options()
+{
+    cat <<EOF
+
+Instance options:
+  APP_AIRE_INSTANCE_DIR [$APP_AIRE_INSTANCE_DIR]
+      Path to the installation directory of current instance
+
+  APP_AIRE_INSTANCE_DOMAIN [${APP_AIRE_INSTANCE_DOMAIN}]
+      Website HTTP domain for instance
+
+  APP_AIRE_INSTANCE_GENERATE_APACHE2
+
+  APP_AIRE_INSTANCE_GENERATE_APACHE2 (yes/no) [${APP_AIRE_INSTANCE_GENERATE_APACHE2}]
+      Generate virtual host definition into /etc/apache2/sites-available/
+
+  APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2 (yes/no) [${APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2}]
+      Create the symlink into /etc/apache2/sites-enabled/
+
+General options:
+
+  APP_AIRE_DEFAULT_CONFIG_FILE [${APP_AIRE_DEFAULT_CONFIG_FILE}]
+      Path to common AIRE configuration (common to all instances)
+
+  APP_AIRE_INSTANCE_CONFIG_DIR [${APP_AIRE_INSTANCE_CONFIG_DIR}]
+      Path to directory containing the instances files
+
+  APP_AIRE_INSTANCE_BASE_DIR [${APP_AIRE_INSTANCE_BASE_DIR}]
+      Path to directory containing the instances' installations
+
+  APP_AIRE_GIT_UPSTREAM_URL [${APP_AIRE_GIT_UPSTREAM_URL}]
+      URL of GIT repository to clone the AIRE source from.
+      (this different from the SYSCONF template "sysconf.app.aire"
+       that this updater script is part of)
+
+  APP_AIRE_APACHE2_CONFIG_PREFIX [${APP_AIRE_APACHE2_CONFIG_PREFIX}]
+      Prefix that is used to compose the Apache2 config file out of instance name
+
+  APP_AIRE_APACHE2_CONFIG_SUFFIX [${APP_AIRE_APACHE2_CONFIG_SUFFIX}]
+      Suffix that is used to compose the Apache2 config file out of instance name
+
+EOF
+}
+
+aire_setup_instance()
+{
+    nef_log "Installing AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'"
+    [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] || mkdir ${APP_AIRE_INSTANCE_BASE_DIR} || nef_fatal "could not create instance base dir"
+    [ -d ${APP_AIRE_INSTANCE_DIR} ] || \
+        git clone ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
+        nef_fatal "git clone failed"
+
+    cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
+    git submodule init
+    git submodule update
+
+    [ -h app/instance ] || ln -s instances/${APP_AIRE_INSTANCE_ENV} app/instance
+
+    app/console zig:install:update-public
+    app/console zig:install:build-openlayers
+    app/console zig:init-translations
+    app/console zig:install:run-shrinksafe
+}
+
+aire_setup_apache2()
+{
+    # Setup Apache virtual host
+    if test "$APP_AIRE_INSTANCE_GENERATE_APACHE2" = "yes"; then
+        apache_file_name=${APP_AIRE_APACHE2_CONFIG_PREFIX}${APP_AIRE_INSTANCE_NAME}${APP_AIRE_APACHE2_CONFIG_SUFFIX}
+        apache_config_path=/etc/apache2/sites-available/${apache_file_name}
+
+        nef_log "Generating ${apache_config_path}"
+        nef_template_apply_file /usr/share/aire/templates/etc.apache2.vhost.conf \
+            >/etc/apache2/sites-available/${apache_file_name}
+
+        if test "$APP_AIRE_INSTANCE_ENABLE_APACHE2" = "yes"; then
+            symlink=/etc/apache2/sites-enabled/${apache_file_name}
+
+            if test -h $symlink; then
+                nef_log "Symlink exists already, fine: $symlink"
+            else
+                nef_log "Enabling Apache2 website through symlink: $symlink"
+                ln -s ../sites-available/${apache_file_name} $symlink
+            fi
+        fi
+        nef_log "Reloading Apache \"gracefully\""
+        apache2ctl -S && apache2ctl graceful
+    fi
+}
+
+##################################################
+# ARGUMENTS parsing
+
+opt_show_env=0
+
+while getopts "s" opt "$@"; do
+    case $opt in
+        s)
+            opt_show_env=1
+            ;;
+        :)
+            echo "Missing argument to option '$OPTARG'"
+            exit 1
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+APP_AIRE_INSTANCE_NAME="$1"
+shift
+
+[ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error
+
+
+##################################################
+# MERGE instance config
+
+[ -f $APP_AIRE_DEFAULT_CONFIG_FILE ] && . $APP_AIRE_DEFAULT_CONFIG_FILE
+
+APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.conf
+[ -f $APP_AIRE_INSTANCE_FILE ] || nef_fatal "Instance file does not exist: $APP_AIRE_INSTANCE_FILE"
+. $APP_AIRE_INSTANCE_FILE
+
+[ "x$APP_AIRE_INSTANCE_DIR" = "x" ] && APP_AIRE_INSTANCE_DIR=$APP_AIRE_INSTANCE_BASE_DIR/$APP_AIRE_INSTANCE_NAME
+
+##################################################
+# MISC commands
+
+if test "$opt_show_env" = "1"; then
+    echo "=== ENVIRONMENT ==="
+    show_options
+    exit 0
+fi
+
+
+##################################################
+# EXECUTE INSTALLATION/UPDATE
+
+#aire_setup_instance
+aire_setup_apache2
