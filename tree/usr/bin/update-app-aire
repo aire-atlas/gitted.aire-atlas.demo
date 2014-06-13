@@ -26,12 +26,13 @@ APP_AIRE_DEFAULT_CONFIG_FILE=/etc/default/aire
 APP_AIRE_INSTANCE_CONFIG_DIR=/etc/aire/instances-enabled
 APP_AIRE_INSTANCE_BASE_DIR=/var/lib/aire
 APP_AIRE_GIT_UPSTREAM_URL=https://github.com/geonef/aire.git
-APP_AIRE_INSTANCE_GENERATE_APACHE2=yes
-APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=no
 APP_AIRE_APACHE2_CONFIG_PREFIX=generated.app.aire.
 APP_AIRE_APACHE2_CONFIG_SUFFIX=.conf
 
+APP_AIRE_INSTANCE_GENERATE_APACHE2=yes
+APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=no
 APP_AIRE_INSTANCE_ENV=test
+APP_AIRE_INSTANCE_GIT_DEPTH=0
 APP_AIRE_INSTANCE_CONFIG_EXTRA=""
 
 show_usage()
@@ -94,6 +95,11 @@ General options:
       (this different from the SYSCONF template "sysconf.app.aire"
        that this updater script is part of)
 
+  APP_AIRE_INSTANCE_GIT_DEPTH [${APP_AIRE_INSTANCE_GIT_DEPTH}]
+      Value of --depth option to the 'git clone' command, see man 1 git-clone.
+      Set 0 if you want to be able to edit+commit the AIRE sources of the instance,
+      this will disable the --depth option and get a full versionned Git repos clone.
+
   APP_AIRE_APACHE2_CONFIG_PREFIX [${APP_AIRE_APACHE2_CONFIG_PREFIX}]
       Prefix that is used to compose the Apache2 config file out of instance name
 
@@ -107,10 +113,14 @@ aire_setup_instance()
 {
     nef_log "Installing AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'"
     [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] || mkdir ${APP_AIRE_INSTANCE_BASE_DIR} || nef_fatal "could not create instance base dir"
-    [ -d ${APP_AIRE_INSTANCE_DIR} ] || \
-        git clone ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
-        nef_fatal "git clone failed"
-
+    [ -d ${APP_AIRE_INSTANCE_DIR} ] || {
+        git_options="--recursive --single-branch"
+        if test "x$APP_AIRE_INSTANCE_GIT_DEPTH" != "x0"; then
+            git_options="$git_options --depth $APP_AIRE_INSTANCE_GIT_DEPTH"
+        fi
+        git clone $git_options ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
+            nef_fatal "git clone failed"
+    }
     cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
     git submodule init
     git submodule update
@@ -119,7 +129,7 @@ aire_setup_instance()
 
     app/console zig:install:update-public
     app/console zig:install:build-openlayers
-    app/console zig:init-translations
+    app/console zig:app:sync-translations
     app/console zig:install:run-shrinksafe
 }
 
@@ -201,5 +211,5 @@ fi
 ##################################################
 # EXECUTE INSTALLATION/UPDATE
 
-#aire_setup_instance
-aire_setup_apache2
+aire_setup_instance
+#aire_setup_apache2
