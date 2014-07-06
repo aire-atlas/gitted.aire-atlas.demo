@@ -19,14 +19,14 @@ _aire_install()
     _packages="$_packages libgdal1 gdal-bin"
 
     # Misc
-    _packages="$_packages curl bzip2"
+    _packages="$_packages curl bzip2 unzip"
     _packages="$_packages openjdk-7-jre-headless" # for shrinksafe JS builds
 
     # system
     _packages="$_packages rsyslog"
     #_packages="$_packages cron"
 
-    sysconf_apt-get install --no-upgrade $_packages
+    sysconf_apt-get install --yes --force-yes --no-upgrade $_packages
 
     # Install custom packages
     for url in \
@@ -35,10 +35,15 @@ _aire_install()
         ; do
 
         package=$(basename "$url")
-        # https://raw.githubusercontent.com/geonef/sysconf.nef.dirty/master/tree/var/lib/nef-cloud/packages/
-        nef_log "installing package: $url"
-        curl $url >/tmp/$package && dpkg -i /tmp/$package && rm -f /tmp/$package \
-            || nef_fatal "could not download or extract package $package"
+        regexp=$(echo $(basename $package .deb) | sed "s/_/ +/g")
+        if dpkg -l | grep -qE "$regexp"; then
+            echo "package already installed: $package"
+        else
+            # https://raw.githubusercontent.com/geonef/sysconf.nef.dirty/master/tree/var/lib/nef-cloud/packages/
+            nef_log "installing package: $url"
+            curl $url >/tmp/$package && dpkg -i /tmp/$package && rm -f /tmp/$package \
+                || nef_fatal "could not download or extract package $package"
+        fi
     done
 
     # Clean-up after package install
