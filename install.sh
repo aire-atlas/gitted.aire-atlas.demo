@@ -1,37 +1,80 @@
 # Installer script for sysconf "nef.service.aire"  -*- shell-script -*-
 
+. /usr/lib/sysconf.base/common.sh
+
 _aire_install()
 {
     local _packages=""
 
+    # HTTPd and PHP
     _packages="$_packages apache2-mpm-prefork libapache2-mod-php5"
-    _packages="$_packages postgresql-9.1 postgresql-9.1-postgis"
-    _packages="$_packages mapserver-bin cgi-mapserver php5-mapscript"
     _packages="$_packages php5-cli php-pear"
 
+    # Databases
+    _packages="$_packages postgresql-9.1 postgresql-9.1-postgis"
+    _packages="$_packages mongodb-server"
 
-    # utilities
+    # MapServer and GDAL
+    _packages="$_packages mapserver-bin cgi-mapserver php5-mapscript"
     _packages="$_packages libgdal1 gdal-bin"
-    _packages="$_packages curl"
-    _packages="$_packages bzip2"
+
+    # Misc
+    _packages="$_packages curl bzip2"
+    _packages="$_packages openjdk-7-jre-headless" # for shrinksafe JS builds
 
     # system
     _packages="$_packages rsyslog"
-
     #_packages="$_packages cron"
 
     sysconf_apt-get install --no-upgrade $_packages
 
+    # Install custom packages
+    for url in \
+        https://raw.githubusercontent.com/geonef/sysconf.nef.dirty/master/tree/var/lib/nef-cloud/packages/php5-mongo_20121217-okapi-1_amd64.deb \
+        https://raw.githubusercontent.com/geonef/php5-gdal/master/builds/php5-gdal_20140613-1_amd64.deb \
+        ; do
+
+        package=$(basename "$url")
+        # https://raw.githubusercontent.com/geonef/sysconf.nef.dirty/master/tree/var/lib/nef-cloud/packages/
+        nef_log "installing package: $url"
+        curl $url >/tmp/$package && dpkg -i /tmp/$package && rm -f /tmp/$package \
+            || nef_fatal "could not download or extract package $package"
+    done
+
+    # Clean-up after package install
     rm -f /etc/apache2/sites-enabled/000-default
 
+    # Install system-wide Swift 4.0.6 (PHP Mailer)
+    pear install swift/Swift-4.0.6
+
+    # Install OpenLayers 2.11rc3
     [ -d /usr/share/javascript/openlayers-2.11rc3 ] || {
         mkdir -p /usr/share/javascript/openlayers-2.11rc3 || nef_fatal "could not mkdir"
         curl "http://openlayers.org/download/OpenLayers-2.11-rc3.tar.gz" \
             | tar xzv --strip-components=1 -C /usr/share/javascript/openlayers-2.11rc3 \
             || nef_fatal "could not download or extract OpenLayers archive"
     }
+
+    # Install Proj4JS 1.0.1
+    [ -d /usr/share/javascript/proj4js-1.0.1 ] || {
+    cd /tmp
+    curl http://trac.osgeo.org/proj4js/raw-attachment/wiki/Download/proj4js-1.0.1.zip >proj4js-1.0.1.zip \
+        && unzip proj4js-1.0.1.zip \
+        && mv proj4js /usr/share/javascript/proj4js-1.0.1 \
+        && rm -f /tmp/proj4js-1.0.1.zip \
+        || nef_fatal "could not download or install proj4js"
+    }
+
+    # Install dojo-1.5.3-src
+    [ -d /usr/share/javascript/dojo-release-1.5.3-src ] || {
+        cd /usr/share/javascript
+        curl http://download.dojotoolkit.org/release-1.5.3/dojo-release-1.5.3-src.tar.gz | tar xzv \
+            || nef_fatal "could not download or extract the dojo-release-1.5.3-src archive"
+    }
+
     # [ -d /usr/share/javascript/dojo-release-1.5 ] || {
     #     mkdir -p /usr/share/javascript/dojo-release-1.5
+        # git clone --depth 1 --single-branch --branch fc262d0d589c490cdd671791f1546a4665ed69c6 https://github.com/dojo/dojo.git /usr/share/javascript/dojo-release-1.5.0-patched-fc262d0d
 
     #     http://download.dojotoolkit.org/release-1.5.3/dojo-release-1.5.3-src.tar.gz
     # [ -d /usr/share/javascript/dojo-release-1.5.0-patched-fc262d0d ] || {
