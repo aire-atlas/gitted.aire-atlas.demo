@@ -38,27 +38,43 @@ APP_AIRE_INSTANCE_USER=aire
 APP_AIRE_INSTANCE_GROUP=www-data
 sudo_aire="sudo -u $APP_AIRE_INSTANCE_USER"
 
-show_usage() { aire_command_usage; }
-app_aire_command_usage()
+show_usage() { app_aire_command_help; }
+app_aire_command_help()
 {
     Z=$(basename $0)
     cat <<EOF
-Usage: $Z [options] <instance> [<command>]
+Usage: $Z [options] [<command> [...]]
 
-  where <INSTANCE> is the lower-case instance name (like "prod", "test", etc.)
-  that will make /etc/aire/instances/INSTANCE.conf get sourced
-  into the environment.
 
   <command> is one of:
 
-    status              Show information about DB and HTTP services
+    usage [<instance>]
+        Print help about what to do next:
+          - how to install a new instance
+          - listing and check suggestions
+        List available instances in ${APP_AIRE_INSTANCE_CONFIG_DIR} and
 
-    env                 Print definition of the instance
+    help
+        Show command invocation syntax and options
 
-    install             Install or complete installation
+    list
+        Show the list of instances which have been configured
 
-    fixperms            Fix group ownership and permissions
+    status
+        Show information about DB and HTTP services
 
+    env [<instance>]
+        Print definition of instance <instance>, or all
+
+    install <instance>
+        Install or complete installation
+
+    fixperms <instance>
+        Fix group ownership and permissions
+
+  <instance> is the lower-case instance name (like "prod", "test", etc.)
+  that matches the file /etc/aire/instances/<instance>.conf which
+  defines its environment.
 
 Options:
     -v, --verbose       Print more messages
@@ -134,8 +150,97 @@ General options:
 EOF
 }
 
+app_aire_command_usage()
+{
+    nef_log "CHECKING SYSTEM SERVICES"
 
-app_aire_command_status()
+    nef_log ""
+    nef_log "Checking MongoDB..."
+    failures=0
+
+    if [ $(ps aux | grep mongodb | grep -vq grep | wc -l) -ne 0 ]; then
+        nef_log "  RUNNING!"
+    else
+        nef_log "  MongoDB process not running. Checking..."
+        if [ -f /var/lib/mongodb/mongod.lock ]; then
+            nef_log "removing lock file: /var/lib/mongodb/mongod.lock"
+            rm -f /var/lib/mongodb/mongod.lock
+        fi
+        nef_log "  Trying to start MongoDB..."
+        service mongodb start || {
+            nef_log "  could not run MongoDB. Check the log"
+            nef_log "    /var/log/mongodb/mongodb.log"
+            failures=$(($failures + 1))
+        }
+    fi
+
+    nef_log ""
+    nef_log "Checking Apache2..."
+    if service apache2 status; then
+        nef_log "  RUNNING!"
+    else
+        failures=$(($failures + 1))
+        nef_log "  Not running. Run:"
+        nef_log "    service apache2 start"
+        nef_log ""
+        nef_log "  If it does not work, check the log:"
+        nef_log "    tail /var/log/apache2/error.log"
+    fi
+
+    nef_log ""
+    nef_log "Checking PostgreSQL..."
+    if service postgresql status; then
+        nef_log "  RUNNING!"
+    else
+        failures=$(($failures + 1))
+        nef_log "  Not running. Run:"
+        nef_log "    service postgresql start"
+        nef_log ""
+        nef_log "  If it does not work, check the logs:"
+        nef_log "    ls -l /var/log/postgresql/"
+    fi
+
+    nef_log ""
+    if [ $failures -eq 0 ]; then
+        nef_log "EVERYTHING WAS ALL RIGHT"
+    else
+        nef_log "$failures failures"
+        nef_log ""
+        nef_log "In case the system setup was not complete, consider running:"
+        nef_log "  sysconf update"
+    fi
+
+    nef_log "  sysconf update"
+    nef_log ""
+    nef_log "CHECKING AIRE INSTANCES"
+
+    profiles=$(find ${APP_AIRE_INSTANCE_CONFIG_DIR} -name '*.conf')
+    count=$(ls $profiles | wc -l)
+    nef_log "  There are $count instances defined in ${APP_AIRE_INSTANCE_CONFIG_DIR}"
+    for profile in $profiles; do
+        name=$(basename $profile .conf)
+        nef_log "  Instance definition: $profile"
+        nef_log "  To install/fix, type:"
+        nef_log "    $0 install $name"
+    done
+
+    if [ $count -eq 0 ]; then
+        nef_log ""
+        nef_log "  To get documentation about create a new AIRE instance:"
+        nef_log "    $0 -p"
+    fi
+
+}
+
+app_aire_command_service()
+{
+    failure=0
+
+
+    return $failure
+}
+
+app_aire_command_service()
 {
     failure=0
 
@@ -148,6 +253,8 @@ app_aire_command_status()
 
 app_aire_command_env()
 {
+    app_aire_load_instance
+
     echo "# Definition of AIRE instance '$APP_AIRE_INSTANCE_NAME'"
     echo "# merged after $APP_AIRE_INSTANCE_FILE"
     echo "#"
@@ -160,23 +267,10 @@ app_aire_command_env()
 
 app_aire_command_install()
 {
-    aire_setup_mongodb
+    app_aire_load_instance
+
     aire_setup_instance
     aire_setup_apache2
-}
-
-aire_setup_mongodb()
-{
-    if [ $(ps aux | grep mongodb | grep -vq grep | wc -l) -eq 0 ]; then
-        nef_log "MongoDB process not running. Checking..."
-        if [ -f /var/lib/mongodb/mongod.lock ]; then
-            nef_log "removing lock file: /var/lib/mongodb/mongod.lock"
-            rm -f /var/lib/mongodb/mongod.lock
-        fi
-        nef_log "Trying to start MongoDB..."
-        service mongodb start \
-            || nef_fatal "could not run MongoDB. Check the log: /var/log/mongodb/mongodb.log"
-    fi
 }
 
 aire_setup_instance()
@@ -184,7 +278,7 @@ aire_setup_instance()
     nef_log "Checking AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'..."
 
     [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] \
-        || $sudo_aire mkdir ${APP_AIRE_INSTANCE_BASE_DIR} \
+        || mkdir ${APP_AIRE_INSTANCE_BASE_DIR} \
         || nef_fatal "could not create instance base dir"
 
     [ -d ${APP_AIRE_INSTANCE_DIR} ] || {
@@ -193,7 +287,7 @@ aire_setup_instance()
         if test "x$APP_AIRE_INSTANCE_GIT_DEPTH" != "x0"; then
             git_options="$git_options --depth $APP_AIRE_INSTANCE_GIT_DEPTH"
         fi
-        $sudo_aire git clone $git_options ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
+        git clone $git_options ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
             nef_fatal "git clone failed"
         cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
 
@@ -248,12 +342,32 @@ aire_setup_apache2()
 
 app_aire_command_fixperms()
 {
+    app_aire_load_instance
+
     cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "could not chdir to instance dir"
     nef_log "Fixing GROUP to '$APP_AIRE_INSTANCE_GROUP' and permissions..."
     chgrp -R $APP_AIRE_INSTANCE_GROUP . \
         && chmod -R g+w . \
         && find . -type d -exec chmod g+s {} \;
 }
+
+######################################################################
+# UTIL FUNCTIONS
+
+# MERGE instance config
+app_aire_load_instance()
+{
+    [ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error "missing AIRE instance name"
+
+    [ -f $APP_AIRE_DEFAULT_CONFIG_FILE ] && . $APP_AIRE_DEFAULT_CONFIG_FILE
+
+    APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.conf
+    [ -f $APP_AIRE_INSTANCE_FILE ] || nef_fatal "Instance file does not exist: $APP_AIRE_INSTANCE_FILE"
+    . $APP_AIRE_INSTANCE_FILE
+
+    [ "x$APP_AIRE_INSTANCE_DIR" = "x" ] && APP_AIRE_INSTANCE_DIR=$APP_AIRE_INSTANCE_BASE_DIR/$APP_AIRE_INSTANCE_NAME
+}
+
 
 ######################################################################
 # COMMAND LINE PARSING
@@ -269,7 +383,10 @@ while [ "$1" != "" ]; do
         -p|--help-profile) show_options; exit 0 ;;
         -*) nef_usage_error "bad option: '$1'" ;;
         *)
-            if [ "x$APP_AIRE_INSTANCE_NAME" = x ]; then
+            # if [ ${#app_aire_command_argv[@]} -eq 1 ]; then
+            #     APP_AIRE_INSTANCE_NAME=$1
+            # fi
+            if [ "x$APP_AIRE_INSTANCE_NAME" = x -a ${#app_aire_command_argv[@]} -eq 1 ]; then
                 APP_AIRE_INSTANCE_NAME=$1
             else
                 app_aire_command_argv=(${app_aire_command_argv[@]} "$1")
@@ -279,24 +396,8 @@ while [ "$1" != "" ]; do
 
 done
 
-[ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error "missing AIRE instance name"
 [ "x${app_aire_command_argv[0]}" = "x" ] && app_aire_command_argv=(usage)
 
-
-
-
-
-
-##################################################
-# MERGE instance config
-
-[ -f $APP_AIRE_DEFAULT_CONFIG_FILE ] && . $APP_AIRE_DEFAULT_CONFIG_FILE
-
-APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.conf
-[ -f $APP_AIRE_INSTANCE_FILE ] || nef_fatal "Instance file does not exist: $APP_AIRE_INSTANCE_FILE"
-. $APP_AIRE_INSTANCE_FILE
-
-[ "x$APP_AIRE_INSTANCE_DIR" = "x" ] && APP_AIRE_INSTANCE_DIR=$APP_AIRE_INSTANCE_BASE_DIR/$APP_AIRE_INSTANCE_NAME
 
 
 ######################################################################
@@ -305,4 +406,4 @@ APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.con
 app_aire_command_function_name="app_aire_command_${app_aire_command_argv[0]}"
 $app_aire_command_function_name "${app_aire_command_argv[@]}" \
     || nef_fatal "command ${app_aire_command_argv[0]} returned status $?"
-nef_log "Command returned successfully."
+# nef_log "Command returned successfully."

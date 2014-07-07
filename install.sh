@@ -23,7 +23,7 @@ _aire_install()
     _packages="$_packages openjdk-7-jre-headless" # for shrinksafe JS builds
 
     # system
-    _packages="$_packages rsyslog"
+    _packages="$_packages rsyslog sudo git"
     #_packages="$_packages cron"
 
     sysconf_apt-get install --yes --force-yes --no-upgrade $_packages
@@ -130,5 +130,6 @@ echo
 echo "Done installing the environment for the AIRE application."
 echo
 echo "To manage the AIRE instances, run as root:"
-echo "\# update-app-aire"
+echo
+echo "  aire-manager"
 echo
