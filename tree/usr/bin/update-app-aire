@@ -7,7 +7,7 @@
 # Usage: $0 <profile-name>
 #
 # This script installs (if missing) or updates (if present) the AIRE instance
-# for the given name, that should lie into /etc/aire/instances-enabled/
+# for the given name, that should lie into /etc/aire/instances/
 #
 # Profile options:
 #
@@ -23,7 +23,7 @@
 # DEFAULTS / INITS
 
 APP_AIRE_DEFAULT_CONFIG_FILE=/etc/default/aire
-APP_AIRE_INSTANCE_CONFIG_DIR=/etc/aire/instances-enabled
+APP_AIRE_INSTANCE_CONFIG_DIR=/etc/aire/instances
 APP_AIRE_INSTANCE_BASE_DIR=/var/lib/aire
 APP_AIRE_GIT_UPSTREAM_URL=https://github.com/geonef/aire.git
 APP_AIRE_APACHE2_CONFIG_PREFIX=generated.app.aire.
@@ -34,20 +34,23 @@ APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=no
 APP_AIRE_INSTANCE_ENV=test
 APP_AIRE_INSTANCE_GIT_DEPTH=0
 APP_AIRE_INSTANCE_CONFIG_EXTRA=""
+APP_AIRE_INSTANCE_USER=aire
+APP_AIRE_INSTANCE_GROUP=www-data
+sudo_aire="sudo $APP_AIRE_INSTANCE_USER"
 
 show_usage()
 {
     cat <<EOF
 Usage: $0 [-s] INSTANCE
   where INSTANCE is the lower-case instance name (like "prod", "test", etc.)
-  that will make /etc/aire/instances-enabled/INSTANCE.conf get sourced
+  that will make /etc/aire/instances/INSTANCE.conf get sourced
   into the environment.
 
 The whole thing works by using shell/environment variables, which are prefixed
 with "APP_AIRE_" and always upper-case.
 
 - common options lie into the /etc/default/aire using common bash definitions
-- instance-specific options lie into /etc/instances-enabled/INSTANCE.conf
+- instance-specific options lie into /etc/instances/INSTANCE.conf
 - options can be given at runtime by setting them as UNIX environment variables,
   for example:
     # APP_AIRE_DEFAULT_CONFIG=/usr/local/etc/default/aire nef-update-aire myinstance
@@ -70,8 +73,6 @@ Instance options:
 
   APP_AIRE_INSTANCE_DOMAIN [${APP_AIRE_INSTANCE_DOMAIN}]
       Website HTTP domain for instance
-
-  APP_AIRE_INSTANCE_GENERATE_APACHE2
 
   APP_AIRE_INSTANCE_GENERATE_APACHE2 (yes/no) [${APP_AIRE_INSTANCE_GENERATE_APACHE2}]
       Generate virtual host definition into /etc/apache2/sites-available/
@@ -109,28 +110,58 @@ General options:
 EOF
 }
 
+aire_setup_mongodb()
+{
+    if [ $(ps aux | grep mongodb | grep -vq grep | wc -l) -eq 0 ]; then
+        nef_log "MongoDB process not running. Checking..."
+        if [ -f /var/lib/mongodb/mongod.lock ]; then
+            nef_log "removing lock file: /var/lib/mongodb/mongod.lock"
+            rm -f /var/lib/mongodb/mongod.lock
+        fi
+        nef_log "Trying to start MongoDB..."
+        service mongodb start \
+            || nef_fatal "could not run MongoDB. Check the log: /var/log/mongodb/mongodb.log"
+    fi
+}
+
 aire_setup_instance()
 {
-    nef_log "Installing AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'"
-    [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] || mkdir ${APP_AIRE_INSTANCE_BASE_DIR} || nef_fatal "could not create instance base dir"
+    nef_log "Checking AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'..."
+
+    [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] \
+        || $sudo_aire mkdir ${APP_AIRE_INSTANCE_BASE_DIR} \
+        || nef_fatal "could not create instance base dir"
+
     [ -d ${APP_AIRE_INSTANCE_DIR} ] || {
+        nef_log "Installing ${APP_AIRE_INSTANCE_DIR} ..."
         git_options="--recursive --single-branch"
         if test "x$APP_AIRE_INSTANCE_GIT_DEPTH" != "x0"; then
             git_options="$git_options --depth $APP_AIRE_INSTANCE_GIT_DEPTH"
         fi
-        git clone $git_options ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
+        $sudo_aire git clone $git_options ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
             nef_fatal "git clone failed"
+        cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
+
+        # Fix owner group
+        chgrp -R $APP_AIRE_INSTANCE_GROUP .
+        chmod -R g+w .
+        find . -type -d -exec chmod g+s {} \;
+
+        $sudo_aire git submodule init
+        $sudo_aire git submodule update
     }
-    cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
-    git submodule init
-    git submodule update
+    cd ${APP_AIRE_INSTANCE_DIR}
 
-    [ -h app/instance ] || ln -s instances/${APP_AIRE_INSTANCE_ENV} app/instance
+    [ -h app/instance ] || $sudo_aire ln -s instances/${APP_AIRE_INSTANCE_ENV} app/instance
 
-    app/console zig:install:update-public
-    app/console zig:install:build-openlayers
-    app/console zig:app:sync-translations
-    app/console zig:install:run-shrinksafe
+    if [ ! -d app/cache/${APP_AIRE_INSTANCE_ENV}/public ]; then
+        nef_log "Generating website static files..."
+        $sudo_aire app/console zig:install:update-public && \
+            $sudo_aire app/console zig:install:build-openlayers && \
+            $sudo_aire app/console zig:app:sync-translations && \
+            $sudo_aire app/console zig:install:run-shrinksafe \
+            || nef_fatal "aire app/console command failed"
+    fi
 }
 
 aire_setup_apache2()
@@ -144,7 +175,7 @@ aire_setup_apache2()
         nef_template_apply_file /usr/share/aire/templates/etc.apache2.vhost.conf \
             >/etc/apache2/sites-available/${apache_file_name}
 
-        if test "$APP_AIRE_INSTANCE_ENABLE_APACHE2" = "yes"; then
+        if test "$APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2" = "yes"; then
             symlink=/etc/apache2/sites-enabled/${apache_file_name}
 
             if test -h $symlink; then
@@ -211,5 +242,6 @@ fi
 ##################################################
 # EXECUTE INSTALLATION/UPDATE
 
+aire_setup_mongodb
 aire_setup_instance
-#aire_setup_apache2
+aire_setup_apache2

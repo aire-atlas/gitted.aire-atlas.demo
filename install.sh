@@ -45,11 +45,15 @@ _aire_install()
                 || nef_fatal "could not download or extract package $package"
         fi
     done
+    # Fix Php5-mongo
+    [ -f /etc/php5/conf.d/mongo.ini ] \
+        || echo "extension=mongo.so" >/etc/php5/conf.d/mongo.ini
 
     # Clean-up after package install
     rm -f /etc/apache2/sites-enabled/000-default
 
     # Install system-wide Swift 4.0.6 (PHP Mailer)
+    pear channel-discover pear.swiftmailer.org
     pear install swift/Swift-4.0.6
 
     # Install OpenLayers 2.11rc3
@@ -95,7 +99,7 @@ _aire_install()
 _aire_setup()
 {
     grep -q ^aire: /etc/passwd || {
-        useradd -d / aire
+        useradd -d / -G www-data aire
     }
 
     _aire_enable_apache_module headers.load
@@ -121,3 +125,10 @@ _aire_reload
 
 #update-rc.d mapserver defaults
 #service mapserver start
+
+echo
+echo "Done installing the environment for the AIRE application."
+echo
+echo "To manage the AIRE instances, run as root:"
+echo "\# update-app-aire"
+echo
