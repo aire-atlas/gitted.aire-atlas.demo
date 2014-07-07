@@ -36,15 +36,47 @@ APP_AIRE_INSTANCE_GIT_DEPTH=0
 APP_AIRE_INSTANCE_CONFIG_EXTRA=""
 APP_AIRE_INSTANCE_USER=aire
 APP_AIRE_INSTANCE_GROUP=www-data
-sudo_aire="sudo $APP_AIRE_INSTANCE_USER"
+sudo_aire="sudo -u $APP_AIRE_INSTANCE_USER"
 
-show_usage()
+show_usage() { aire_command_usage; }
+app_aire_command_usage()
 {
+    Z=$(basename $0)
     cat <<EOF
-Usage: $0 [-s] INSTANCE
-  where INSTANCE is the lower-case instance name (like "prod", "test", etc.)
+Usage: $Z [options] <instance> [<command>]
+
+  where <INSTANCE> is the lower-case instance name (like "prod", "test", etc.)
   that will make /etc/aire/instances/INSTANCE.conf get sourced
   into the environment.
+
+  <command> is one of:
+
+    status              Show information about DB and HTTP services
+
+    env                 Print definition of the instance
+
+    install             Install or complete installation
+
+    fixperms            Fix group ownership and permissions
+
+
+Options:
+    -v, --verbose       Print more messages
+
+    -h, --help
+        Show usage help
+
+    -p, --help-profile
+        Print documentation about profile
+
+Type "$Z -p" to read the doc about instance definitions...
+EOF
+}
+show_options()
+{
+    cat <<EOF
+
+*********** 1 AIRE instance = 1 profile file in /etc/aire/instances ************
 
 The whole thing works by using shell/environment variables, which are prefixed
 with "APP_AIRE_" and always upper-case.
@@ -58,14 +90,6 @@ with "APP_AIRE_" and always upper-case.
 NOTE: the AIRE application has system dependencies that are managed automatically
       by the install.sh script of the "sysconf.app.aire" SYSCONF profile
       (which means, just run "sysconf update" and it should be automatic).
-
-EOF
-    show_options
-}
-
-show_options()
-{
-    cat <<EOF
 
 Instance options:
   APP_AIRE_INSTANCE_DIR [$APP_AIRE_INSTANCE_DIR]
@@ -110,6 +134,37 @@ General options:
 EOF
 }
 
+
+app_aire_command_status()
+{
+    failure=0
+
+    service mongodb status || failure=1
+    service apache2 status || failure=1
+    service postgresql status || failure=1
+
+    return $failure
+}
+
+app_aire_command_env()
+{
+    echo "# Definition of AIRE instance '$APP_AIRE_INSTANCE_NAME'"
+    echo "# merged after $APP_AIRE_INSTANCE_FILE"
+    echo "#"
+    ( set -o posix ; set ) | grep APP_AIRE_
+}
+
+
+##################################################
+# INSTALLATION/UPDATE
+
+app_aire_command_install()
+{
+    aire_setup_mongodb
+    aire_setup_instance
+    aire_setup_apache2
+}
+
 aire_setup_mongodb()
 {
     if [ $(ps aux | grep mongodb | grep -vq grep | wc -l) -eq 0 ]; then
@@ -145,7 +200,7 @@ aire_setup_instance()
         # Fix owner group
         chgrp -R $APP_AIRE_INSTANCE_GROUP .
         chmod -R g+w .
-        find . -type -d -exec chmod g+s {} \;
+        find . -type d -exec chmod g+s {} \;
 
         $sudo_aire git submodule init
         $sudo_aire git submodule update
@@ -190,32 +245,46 @@ aire_setup_apache2()
     fi
 }
 
-##################################################
-# ARGUMENTS parsing
 
-opt_show_env=0
+app_aire_command_fixperms()
+{
+    cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "could not chdir to instance dir"
+    nef_log "Fixing GROUP to '$APP_AIRE_INSTANCE_GROUP' and permissions..."
+    chgrp -R $APP_AIRE_INSTANCE_GROUP . \
+        && chmod -R g+w . \
+        && find . -type d -exec chmod g+s {} \;
+}
 
-while getopts "s" opt "$@"; do
-    case $opt in
-        s)
-            opt_show_env=1
-            ;;
-        :)
-            echo "Missing argument to option '$OPTARG'"
-            exit 1
-            ;;
-        \?)
-            echo "Invalid option: -$OPTARG" >&2
-            ;;
+######################################################################
+# COMMAND LINE PARSING
+
+app_aire_opt_verbose=no
+app_aire_command_argv=()
+
+while [ "$1" != "" ]; do
+
+    case "$1" in
+        -v | --verbose) app_aire_opt_verbose=yes; shift ;;
+        -h|--help) show_usage; exit 0 ;;
+        -p|--help-profile) show_options; exit 0 ;;
+        -*) nef_usage_error "bad option: '$1'" ;;
+        *)
+            if [ "x$APP_AIRE_INSTANCE_NAME" = x ]; then
+                APP_AIRE_INSTANCE_NAME=$1
+            else
+                app_aire_command_argv=(${app_aire_command_argv[@]} "$1")
+            fi
+            shift ;;
     esac
+
 done
 
-shift $((OPTIND-1))
+[ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error "missing AIRE instance name"
+[ "x${app_aire_command_argv[0]}" = "x" ] && app_aire_command_argv=(usage)
 
-APP_AIRE_INSTANCE_NAME="$1"
-shift
 
-[ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error
+
+
 
 
 ##################################################
@@ -229,19 +298,11 @@ APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.con
 
 [ "x$APP_AIRE_INSTANCE_DIR" = "x" ] && APP_AIRE_INSTANCE_DIR=$APP_AIRE_INSTANCE_BASE_DIR/$APP_AIRE_INSTANCE_NAME
 
-##################################################
-# MISC commands
 
-if test "$opt_show_env" = "1"; then
-    echo "=== ENVIRONMENT ==="
-    show_options
-    exit 0
-fi
+######################################################################
+# RUNTIME
 
-
-##################################################
-# EXECUTE INSTALLATION/UPDATE
-
-aire_setup_mongodb
-aire_setup_instance
-aire_setup_apache2
+app_aire_command_function_name="app_aire_command_${app_aire_command_argv[0]}"
+$app_aire_command_function_name "${app_aire_command_argv[@]}" \
+    || nef_fatal "command ${app_aire_command_argv[0]} returned status $?"
+nef_log "Command returned successfully."
