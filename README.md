@@ -33,7 +33,8 @@ How can access AIRE by pointer a web browser to http://127.0.0.1/
 
 ## Extended instructions 
 
-* [System setting-up](System setting-up)
+* [System setting-up](SETUP.md)
+* [Managing instances](INSTANCES.md)
 
 ## Notes
 
