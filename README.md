@@ -40,4 +40,4 @@ How can access AIRE by pointer a web browser to http://127.0.0.1/
 
 _sysconf.app.aire_ is a [SYSCONF profile](https://github.com/geonef/sysconf.base)
 which depends on the [sysconf.nef.common](https://github.com/geonef/sysconf.nef.common) profile.
-Check the [sysconf.base](https://github.com/geonef/sysconf.base) profile for explanations and setup instructions.
+Check out the [sysconf.base](https://github.com/geonef/sysconf.base) profile to learn more.
