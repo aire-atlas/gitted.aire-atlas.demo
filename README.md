@@ -18,15 +18,22 @@ This repository _sysconf.app.aire_ is just part of the project and provides :
 * Initial datasets, in [tree/usr/share/aire/data](./tree/usr/share/aire/data)
 
 
-## Quick installation
+## Quick installation on a Debian/Ubuntu system
 
 ```shell
 sudo apt-get install curl git && curl https://raw.githubusercontent.com/geonef/sysconf.base/master/tree/usr/bin/sysconf | sudo bash -s init https://github.com/aire-atlas/sysconf.app.aire.git compile install update
 ```
 
 ```shell
-aire-manager install demo
+sudo aire-manager install demo
 ```
+
+That's all!
+How can access AIRE by pointer a web browser to http://127.0.0.1/
+
+## Extended instructions 
+
+* (System setting-up)
 
 ## Notes
 
