@@ -33,9 +33,9 @@ How can access AIRE by pointer a web browser to http://127.0.0.1/
 
 ## Extended instructions 
 
-* [Ready-to-use virtualized environments](VIRTUAL.md)
 * [System setting-up](SETUP.md)
 * [Managing instances](INSTANCES.md)
+* [Ready-to-use virtualized environments](VIRTUAL.md)
 
 ## Notes
 
