@@ -5,5 +5,3 @@
 ## VirtualBox images
 
 ## Linux Container (LXC)
-
-## Docker.io
