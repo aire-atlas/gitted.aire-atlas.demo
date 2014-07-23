@@ -18,6 +18,17 @@ This repository _sysconf.app.aire_ is just part of the project and provides :
 * Initial datasets, in [tree/usr/share/aire/data](./tree/usr/share/aire/data)
 
 
-## Quick guide
+## Quick installation
 
-This one repository is a SYSCONF profile, see: https://github.com/geonef/sysconf.base for explanations and setup instructions.
+```bash
+sudo apt-get install curl git && curl https://raw.githubusercontent.com/geonef/sysconf.base/master/tree/usr/bin/sysconf | sudo bash -s init https://github.com/aire-atlas/sysconf.app.aire.git compile install update
+```
+
+aire-manager install demo
+
+
+## Notes
+
+_sysconf.app.aire_ is a [SYSCONF profile](https://github.com/geonef/sysconf.base)
+which depends on the [sysconf.nef.common](https://github.com/geonef/sysconf.nef.common) profile.
+Check the [sysconf.base](https://github.com/geonef/sysconf.base) profile for explanations and setup instructions.
