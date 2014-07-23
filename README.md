@@ -20,12 +20,13 @@ This repository _sysconf.app.aire_ is just part of the project and provides :
 
 ## Quick installation
 
-```bash
+```shell
 sudo apt-get install curl git && curl https://raw.githubusercontent.com/geonef/sysconf.base/master/tree/usr/bin/sysconf | sudo bash -s init https://github.com/aire-atlas/sysconf.app.aire.git compile install update
 ```
 
+```shell
 aire-manager install demo
-
+```
 
 ## Notes
 
