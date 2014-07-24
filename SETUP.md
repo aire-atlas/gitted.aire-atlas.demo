@@ -42,8 +42,8 @@ Software used to build the Javascript app:
 
 ## Manual setup
 
-Read [install.sh](install.sh), you can do what it does by following it.
-It is commented for better comprehension.
+Read [install.sh](install.sh), you can do what it does by following it
+(don't worry, it is less than 150 lines, comments included).
 
 If you are using a distribution other than Debian GNU/Linux,
 you will need to adapt some of the commands (such as _apt-get_, the names of
