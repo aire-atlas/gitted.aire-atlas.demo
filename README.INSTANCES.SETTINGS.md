@@ -1,4 +1,4 @@
-# Supported settings for AIRE instance definitions
+# Instance settings for ``` aire-manager ```
 
 ## Most important settings
 
@@ -30,7 +30,7 @@ Whether ``` aire-manager ``` should create a symbolic link into ```
 /etc/apache2/sites-enabled/ ```. Implies that ```
 APP_AIRE_INSTANCE_GENERATE_APACHE2=yes ```
 
-* **Defaults to: ``` no ``` **
+* **Defaults to: ``` no ```**
 
 
 
