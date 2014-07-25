@@ -23,7 +23,9 @@ install by ``` aire-manager ```.
 If ``` APP_AIRE_INSTANCE_GENERATE_APACHE2 ``` is set to ``` yes ```,
 then ``` aire-manager install ... ``` will generate an Apache virtual
 host file:
-```/etc/apache2/sites-available/${APP_AIRE_APACHE2_CONFIG_PREFIX}{INSTANCE}${APP_AIRE_APACHE2_CONFIG_SUFFIX}```
+```
+/etc/apache2/sites-available/${APP_AIRE_APACHE2_CONFIG_PREFIX}{INSTANCE}${APP_AIRE_APACHE2_CONFIG_SUFFIX}
+```
 (example: ```/etc/apache2/sites-available/generated.app.aire.demo.conf```)
 
 * Defaults to: ``` generated.app.aire. ```
