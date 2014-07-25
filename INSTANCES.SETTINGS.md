@@ -7,7 +7,7 @@
 URL of the GIT repository that has the AIRE source code to install by
 ``` aire-manager ```.
 
-* Defaults to: ``` https://github.com/aire-atlas/aire.git ```
+* **Defaults to: ``` https://github.com/aire-atlas/aire.git ```**
 
 
 ### APP_AIRE_GIT_BRANCH
