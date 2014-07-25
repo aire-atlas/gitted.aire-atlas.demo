@@ -14,7 +14,7 @@ Beyond a simple consultation tool, the atlas allows an acces to multiple represe
 This repository _sysconf.app.aire_ is just part of the project and provides :
 * The *system setup* script [install.sh](./install.sh), designed to work on Debian-compatible GNU/Linux systems
 * Documentation and tips about the installation and maintenacne of the AIRE atlas
-* The *manager* script [tree/usr/bin/aire-manager](./tree/usr/share/aire-manager) which manages installation, update and troubleshooting of the various website instances configured to run on the system
+* The *manager* script [tree/usr/bin/aire-manager](./tree/usr/bin/aire-manager) which manages installation, update and troubleshooting of the various website instances configured to run on the system
 * Initial datasets, in [tree/usr/share/aire/data](./tree/usr/share/aire/data)
 
 
