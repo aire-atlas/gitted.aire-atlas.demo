@@ -1,7 +1,5 @@
 # Ready-to-use virtualized environements
 
-* WORK IN PROGRESS: this is the skeleton
-
 ## Linux Container (LXC)
 
 LXC is a tool based on the _cgroups_ kernel feature that allows

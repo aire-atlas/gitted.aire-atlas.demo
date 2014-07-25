@@ -41,3 +41,51 @@ Just type as root:
 aire-manager
 ```
 
+It should show something like:
+```
+aire-manager: CHECKING SYSTEM SERVICES
+aire-manager: 
+aire-manager: Checking MongoDB...
+aire-manager:   MongoDB process not running. Checking...
+aire-manager:   Trying to start MongoDB...
+[ ok ] Starting database: mongodb apparently already running.
+aire-manager: 
+aire-manager: Checking Apache2...
+Apache2 is running (pid 8445).
+aire-manager:   RUNNING!
+aire-manager: 
+aire-manager: Checking PostgreSQL...
+aire-manager:   RUNNING!
+aire-manager: 
+aire-manager: EVERYTHING WAS ALL RIGHT
+aire-manager:   sysconf update
+aire-manager: 
+aire-manager: CHECKING AIRE INSTANCES
+aire-manager:   There are 1 instances defined in /etc/aire/instances
+aire-manager:   Instance definition: /etc/aire/instances/demo.conf
+aire-manager:   To install/fix, type:
+aire-manager:     /usr/bin/aire-manager install demo
+```
+
+## /etc/aire/instances/ : instances definitions
+
+The file _/etc/aire/instances/demo.conf_ is pre-installed, as shown by the
+output of _aire_manager_ above (_Instance definition: /etc/aire/instances/demo.conf_).
+
+As you can see, it contains this content:
+```
+APP_AIRE_INSTANCE_DIR=/var/lib/aire/demo
+APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=yes
+```
+
+Which means that _demo_ is an instance to be installed into _/var/lib/aire/demo_
+(option _APP_AIRE_INSTANCE_DIR_) and should be enabled automatically as an
+Apache2 website (option _APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2_).
+
+This is the minimum. It should work if MongoDB does not require authentication.
+
+To install and activate the instance, just type:
+```
+aire-manager install demo
+```
+
