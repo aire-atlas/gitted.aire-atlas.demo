@@ -97,5 +97,7 @@ You can have as many instances as you need. It is easy:
 * create _/etc/aire/instances/{INSTANCE}.conf_ (where {INSTANCE} is the name of your instance, in lower case only)
 * take example on _/etc/aire/instances/demo.conf_
 ** set _APP_AIRE_INSTANCE_DIR_ to _/var/lib/aire/{INSTANCE}_ for example
+** you may need to set ``` APP_AIRE_INSTANCE_DOMAIN ``` to the domain
+*that you want to use (and update your /etc/hosts or DNS entry file if needed)
 ** set the settings that you need as documented in [README.INSTANCES.SETTINGS.md](README.INSTANCES.SETTINGS.md)
 * run: ``` aire-manager install {INSTANCE} ```
