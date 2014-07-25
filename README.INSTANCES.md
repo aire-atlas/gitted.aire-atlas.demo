@@ -84,7 +84,7 @@ Apache2 website (setting _APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2_).
 
 This is the minimum. It should work if MongoDB does not require authentication.
 
-For the full list of available settings, read: **[INSTANCES.SETTINGS.md](INSTANCES.SETTINGS.md)**
+For the full list of available settings, read: [README.INSTANCES.SETTINGS.md](README.INSTANCES.SETTINGS.md)
 
 To install and activate the instance, just type:
 ```
@@ -97,5 +97,5 @@ You can have as many instances as you need. It is easy:
 * create _/etc/aire/instances/{INSTANCE}.conf_ (where {INSTANCE} is the name of your instance, in lower case only)
 * take example on _/etc/aire/instances/demo.conf_
 ** set _APP_AIRE_INSTANCE_DIR_ to _/var/lib/aire/{INSTANCE}_ for example
-** set the settings that you need as documented in [INSTANCES.SETTINGS.md](INSTANCES.SETTINGS.md)
+** set the settings that you need as documented in [README.INSTANCES.SETTINGS.md](README.INSTANCES.SETTINGS.md)
 * run: ``` aire-manager install {INSTANCE} ```

@@ -34,9 +34,9 @@ How can access AIRE by pointer a web browser to http://127.0.0.1/
 
 ## Extended instructions 
 
-* [System setting-up](SETUP.md) to prepare the Linux system with all required dependencies
-* [Managing instances](INSTANCES.md) to manage single or multiple AIRE atlases
-* [Ready-to-use virtualized environments](VIRTUAL.md) for some hints for installing within
+* [System setting-up](README.SETUP.md) to prepare the Linux system with all required dependencies
+* [Managing instances](README.INSTANCES.md) to manage single or multiple AIRE atlases
+* [Ready-to-use virtualized environments](README.SETUP.VIRTUAL.md) for some hints for installing within
   virtual machine and container
 
 ## Notes
