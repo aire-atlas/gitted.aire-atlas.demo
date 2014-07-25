@@ -78,9 +78,10 @@ APP_AIRE_INSTANCE_DIR=/var/lib/aire/demo
 APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=yes
 ```
 
-Which means that _demo_ is an instance to be installed into _/var/lib/aire/demo_
-(setting _APP_AIRE_INSTANCE_DIR_) and should be enabled automatically as an
-Apache2 website (setting _APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2_).
+Which means that _demo_ is an instance to be installed into ``` /var/lib/aire/demo ```
+(setting ``` APP_AIRE_INSTANCE_DIR ```) and should be enabled
+automatically as an Apache2 website (setting ```
+APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2 ```).
 
 This is the minimum. It should work if MongoDB does not require authentication.
 
@@ -94,9 +95,9 @@ aire-manager install demo
 ## How to create a new instance
 
 You can have as many instances as you need. It is easy:
-* create _/etc/aire/instances/{INSTANCE}.conf_ (where {INSTANCE} is the name of your instance, in lower case only)
-* take example on _/etc/aire/instances/demo.conf_
-  * set _APP_AIRE_INSTANCE_DIR_ to _/var/lib/aire/{INSTANCE}_ for example
+* create ``` /etc/aire/instances/{INSTANCE}.conf ``` (where {INSTANCE} is the name of your instance, in lower case only)
+* take example on ``` /etc/aire/instances/demo.conf ```
+  * set ``` APP_AIRE_INSTANCE_DIR ``` to ``` /var/lib/aire/{INSTANCE} ``` for example
   * you may need to set ``` APP_AIRE_INSTANCE_DOMAIN ``` to the domain
   that you want to use (and update your /etc/hosts or DNS entry file if needed)
   * set the settings that you need as documented in [README.INSTANCES.SETTINGS.md](README.INSTANCES.SETTINGS.md)
