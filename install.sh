@@ -77,7 +77,8 @@ _aire_install()
     # Install dojo-1.5.3-src
     [ -d /usr/share/javascript/dojo-release-1.5.3-src ] || {
         cd /usr/share/javascript
-        curl http://download.dojotoolkit.org/release-1.5.3/dojo-release-1.5.3-src.tar.gz | tar xzv \
+        curl http://download.dojotoolkit.org/release-1.5.3/dojo-release-1.5.3-src.tar.gz \
+            | tar xzv --no-same-owner \
             || nef_fatal "could not download or extract the dojo-release-1.5.3-src archive"
     }
 
