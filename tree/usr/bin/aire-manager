@@ -312,6 +312,11 @@ aire_setup_instance()
             $sudo_aire app/console zig:install:run-shrinksafe \
             || nef_fatal "aire app/console command failed"
     fi
+    nef_log "Fixing files ownership and permissions..."
+    # note: redundant with 'app_aire_command_fixperms'
+    chgrp -R $APP_AIRE_INSTANCE_GROUP . \
+        && chmod -R g+w . \
+        && find . -type d -exec chmod g+s {} \;
 }
 
 aire_setup_apache2()

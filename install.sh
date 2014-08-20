@@ -99,10 +99,20 @@ _aire_install()
 
 _aire_setup()
 {
+    # "aire" UNIX account
     grep -q ^aire: /etc/passwd || {
         useradd -d / -G www-data aire
     }
 
+    # "aire" PostgreSQL account
+    if echo '\dg' | sudo -u postgres psql | grep -qv aire; then
+        echo "CREATE ROLE aire PASSWORD 'NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT' NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;" | sudo -u postgres psql
+    fi
+
+    # sudo -u postgres createuser --login --encrypted --no-superuser --no-createrole --no-createdb aire
+    # NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT
+
+    # Apache setup
     _aire_enable_apache_module headers.load
     _aire_enable_apache_module rewrite.load
     _aire_enable_apache_module expires.load
