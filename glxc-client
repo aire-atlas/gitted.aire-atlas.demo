@@ -105,14 +105,8 @@ glxc_command_remote() {
             2>&1 | nef_log_pipe "sysconf@$_name:"
     }
 
-    # lxc-setup is always (re-)run
-    [ -f $(dirname $0)/glxc-server-setup ] || nef_fatal "missing: $(dirname $0)/glxc-server-setup"
-    cat $(dirname $0)/glxc-server-setup | lxc-attach --clear-env -n $_name -- sh >&2
-
-
     nef_log "Forwarding command '$remote_command' to glxc in container '$_name'..."
     lxc-attach --clear-env -n $_name -- glxc git-remote-command $remote_command
-
 }
 
 # command: help [command]
