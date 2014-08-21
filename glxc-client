@@ -105,8 +105,8 @@ glxc_command_remote() {
             2>&1 | nef_log_pipe "sysconf@$_name:"
     }
 
-    nef_log "Forwarding command '$remote_command' to glxc in container '$_name'..."
-    lxc-attach --clear-env -n $_name -- glxc git-remote-command $remote_command
+    nef_log "Forwarding command '$_command' to glxc in container '$_name'..."
+    lxc-attach --clear-env -n $_name -- glxc git-remote-command $_command
 }
 
 # command: help [command]
