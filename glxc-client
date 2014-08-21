@@ -102,7 +102,7 @@ glxc_command_remote() {
             | lxc-attach --clear-env -n $_name -- tar x -C / --strip-components=1 >&2
         lxc-attach --clear-env -n $_name -- \
             /sysconf/sysconf.base/tree/usr/bin/sysconf compile install update \
-            2>&1 | nef_log_pipe "sysconf:"
+            2>&1 | nef_log_pipe "sysconf@$_name:"
     }
 
     # lxc-setup is always (re-)run
