@@ -1,6 +1,9 @@
 #!/bin/bash
 #
 
+GLXC_DATA_PATH=glxc/sysconf \
+    /usr/share/glxc/import/sysconf
+
 GLXC_DATA_PATH=aire-data GLXC_AIRE_INSTANCE=demo \
     /usr/share/glxc/import/aire-data-files
 
