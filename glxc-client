@@ -97,10 +97,14 @@ glxc_command_remote() {
     fi
 
     lxc-attach --clear-env -n $_name -- test -d /sysconf || {
-        nef_log "sysconf is not defined"
-        # $glxc_executive_treeish
+        nef_log "sysconf is not defined. extracting from $glxc_executive_treeish..."
+        git archive $glxc_executive_treeish glxc/sysconf/ \
+            | lxc-attach --clear-env -n $_name -- tar x -C / --strip-components=1 >&2
+        lxc-attach --clear-env -n $_name -- \
+            /sysconf/sysconf.base/tree/usr/bin/sysconf compile install update \
+            2>&1 | nef_log_pipe "sysconf:"
     }
-    exit
+
     # lxc-setup is always (re-)run
     [ -f $(dirname $0)/glxc-server-setup ] || nef_fatal "missing: $(dirname $0)/glxc-server-setup"
     cat $(dirname $0)/glxc-server-setup | lxc-attach --clear-env -n $_name -- sh >&2
@@ -238,6 +242,23 @@ nef_log() {
     else
         echo "$line" | tee -a $LOG_FILE >&2
     fi
+}
+
+nef_log_pipe() {
+    local _opt_stdout=no
+
+    while true; do
+        case "$1" in
+            --stdout) _opt_stdout=yes; shift ;;
+            *) break ;;
+        esac
+    done
+
+    while read; do
+        nef_log "$@" "$REPLY"
+        [ $_opt_stdout = yes ] && echo "$REPLY"
+    done
+    return 0
 }
 
 nef_fatal() {
