@@ -12,9 +12,30 @@ glxc_executive_treeish=
 ######################################################################
 # COMMANDS
 
+# command: register
+#
+# Copy the glxc-client to the .git
+##
+glxc_command_register() {
+    local _argv=()
+
+    while [ -n "$1" ]; do
+        case "$1" in
+            -h) glxc_command_help init; return ;;
+            -*) glxc_eval_common_option "$1"; shift ;;
+            *) _argv=("${_argv[@]}" "$1"); shift ;;
+        esac
+    done
+
+    [ "${#_argv[@]}" -gt 0 ] && nef_fatal_usage_command init "too many arguments"
+
+    nef_log "Copying $0 to GIT dir..."
+    glxc_ensure_script_in_git_dir
+}
+
 # command: init <name>
 #
-# Copy the glxc-client to the .git if needed and register a GIT ext remote to it
+# Register a GIT ext remote to it
 ##
 glxc_command_init() {
     local _argv=()
@@ -31,8 +52,6 @@ glxc_command_init() {
     [ "${#_argv[@]}" -gt 1 ] && nef_fatal_usage_command init "too many arguments"
 
     local _name="${_argv[0]}"
-
-    glxc_ensure_script_in_git_dir
 
     if git remote | grep -q "^${_name} "; then
         echo "Remote '$_name' exists already:"
