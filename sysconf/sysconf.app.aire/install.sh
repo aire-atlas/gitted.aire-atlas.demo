@@ -61,6 +61,8 @@ _aire_install()
         mkdir -p /usr/share/javascript/openlayers-2.11rc3 || nef_fatal "could not mkdir"
         curl "http://openlayers.org/download/OpenLayers-2.11-rc3.tar.gz" \
             | tar xzv --strip-components=1 -C /usr/share/javascript/openlayers-2.11rc3 \
+            --exclude=doc --exclude=apidoc_config --exclude=examples \
+            --exclude=doc_config --exclude=tests \
             || nef_fatal "could not download or extract OpenLayers archive"
     }
 
@@ -78,7 +80,7 @@ _aire_install()
     [ -d /usr/share/javascript/dojo-release-1.5.3-src ] || {
         cd /usr/share/javascript
         curl http://download.dojotoolkit.org/release-1.5.3/dojo-release-1.5.3-src.tar.gz \
-            | tar xzv --no-same-owner \
+            | tar xzv --no-same-owner --exclude=tests --exclude=demos --exclude=docscripts --exclude=doh \
             || nef_fatal "could not download or extract the dojo-release-1.5.3-src archive"
     }
 
