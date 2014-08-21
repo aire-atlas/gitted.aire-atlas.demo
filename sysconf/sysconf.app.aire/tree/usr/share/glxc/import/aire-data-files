@@ -9,9 +9,13 @@
 [ -z "$GLXC_AIRE_INSTANCE" ] && nef_fatal "missing variable: GLXC_AIRE_INSTANCE"
 
 state_ref=$(glxc_state_ref_name aire-data-files)
+state_commit=$(git show-ref -s $state_ref)
+state_tree=
+if [ -n "$state_commit" ]; then
+    state_tree="$(git ls-tree $state_ref $GLXC_DATA_PATH)"
+fi
 
-if [ "$(git ls-tree $state_ref $GLXC_DATA_PATH)" \
-    != "$(git ls-tree $glxc_new_commit $GLXC_DATA_PATH)" ]; then
+if [ "$state_tree" != "$(git ls-tree $glxc_new_commit $GLXC_DATA_PATH)" ]; then
 
     instance_dir=$(eval "$(aire-manager env $GLXC_AIRE_INSTANCE)" && echo $APP_AIRE_INSTANCE_DIR)
     [ -d "$instance_dir" -a -d "$instance_dir/app" ] || nef_fatal "instance '$GLXC_AIRE_INSTANCE' missing in dir: $instance_dir"

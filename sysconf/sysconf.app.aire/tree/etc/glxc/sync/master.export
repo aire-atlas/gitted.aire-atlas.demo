@@ -4,5 +4,5 @@
 GLXC_DATA_PATH=glxc/sysconf \
     /usr/share/glxc/export/sysconf
 
-GLXC_DATA_PATH=mongodb GLXC_MONGODB_DATABASE=aire_test GLXC_MONGODB_FORMAT=bson \
+GLXC_DATA_PATH=mongodb GLXC_MONGODB_DATABASE=aire_test GLXC_MONGODB_FORMAT=json \
     /usr/share/glxc/export/mongodb
