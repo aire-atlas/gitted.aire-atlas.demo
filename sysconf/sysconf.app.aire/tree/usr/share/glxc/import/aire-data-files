@@ -33,5 +33,5 @@ if [ "$state_tree" != "$present_tree" ]; then
     mv $GLXC_DATA_PATH data
     git update-ref -m "import AIRE data from $glxc_new_commit" $state_ref $glxc_new_commit
 else
-    nef_log "no change for path: $GLXC_DATA_PATH"
+    nef_log "No change for path: $GLXC_DATA_PATH"
 fi
