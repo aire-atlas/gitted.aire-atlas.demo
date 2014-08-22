@@ -1,0 +1,8 @@
+
+/etc/mongodb.conf.d, part of sysconf.app.aire
+
+The files in this directory ending with "mongodb.conf" are concatenated
+into /etc/mongodb.conf by the install.sh script
+(in /sysconf/sysconf.app.aire).
+
+See: https://github.com/aire-atlas/sysconf.app.aire

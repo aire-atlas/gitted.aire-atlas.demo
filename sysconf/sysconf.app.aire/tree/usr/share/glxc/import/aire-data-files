@@ -15,10 +15,16 @@ if [ -n "$state_commit" ]; then
     state_tree="$(git ls-tree $state_ref $GLXC_DATA_PATH)"
 fi
 
-if [ "$state_tree" != "$(git ls-tree $glxc_new_commit $GLXC_DATA_PATH)" ]; then
+present_tree="$(git ls-tree $glxc_new_commit $GLXC_DATA_PATH)"
+
+if [ "$state_tree" != "$present_tree" ]; then
 
     instance_dir=$(eval "$(aire-manager env $GLXC_AIRE_INSTANCE)" && echo $APP_AIRE_INSTANCE_DIR)
-    [ -d "$instance_dir" -a -d "$instance_dir/app" ] || nef_fatal "instance '$GLXC_AIRE_INSTANCE' missing in dir: $instance_dir"
+    if [ ! -d "$instance_dir" ]; then
+        aire-manager install $GLXC_AIRE_INSTANCE 2>&1 | nef_log_pipe "aire install:" \
+            || nef_fatal "instance '$GLXC_AIRE_INSTANCE' could not be installed"
+    fi
+
     cd $instance_dir/app
     rm -rf data/
     nef_log "changes detected for path: $GLXC_DATA_PATH"

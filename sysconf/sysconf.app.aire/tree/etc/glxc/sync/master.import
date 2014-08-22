@@ -7,7 +7,7 @@ GLXC_DATA_PATH=glxc/sysconf \
 GLXC_DATA_PATH=aire-data GLXC_AIRE_INSTANCE=demo \
     /usr/share/glxc/import/aire-data-files
 
-GLXC_DATA_PATH=mongodb GLXC_MONGODB_DATABASE=aire_test GLXC_MONGODB_EXPORT_FORMAT=bson \
+GLXC_DATA_PATH=mongodb GLXC_MONGODB_DATABASE=aire_test GLXC_MONGODB_EXPORT_FORMAT=json \
     /usr/share/glxc/import/mongodb
 
 GLXC_DATA_PATH=postgresql GLXC_POSTGRESQL_DATABASE=aire \
