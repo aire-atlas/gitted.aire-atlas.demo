@@ -21,7 +21,7 @@ glxc_command_register() {
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help init; return ;;
+            -h|--help) glxc_command_help init; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
@@ -33,23 +33,27 @@ glxc_command_register() {
     glxc_ensure_script_in_git_dir
 }
 
-# command: init <name>
+# command: add <name>
 #
-# Register a GIT ext remote to it
+# Register a GIT ext remote for the LXC container <name>
+#
+# The container will be created the first time the handle-remote-protocol command
+# is called (by git push/fetch/pull, etc.).
+# If the container exists already, it is used.
 ##
-glxc_command_init() {
+glxc_command_add() {
     local _argv=()
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help init; return ;;
+            -h|--help) glxc_command_help add; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
     done
 
-    [ "${#_argv[@]}" -lt 1 ] && nef_fatal_usage_command init "missing argument(s)"
-    [ "${#_argv[@]}" -gt 1 ] && nef_fatal_usage_command init "too many arguments"
+    [ "${#_argv[@]}" -lt 1 ] && nef_fatal_usage_command add "missing argument(s)"
+    [ "${#_argv[@]}" -gt 1 ] && nef_fatal_usage_command add "too many arguments"
 
     local _name="${_argv[0]}"
 
@@ -84,7 +88,7 @@ glxc_command_handle-remote-protocol() {
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help handle-remote-protocol; return ;;
+            -h|--help) glxc_command_help handle-remote-protocol; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
@@ -111,7 +115,7 @@ glxc_command_list() {
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help list; return ;;
+            -h|--help) glxc_command_help list; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
@@ -131,7 +135,7 @@ glxc_command_refs() {
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help refs; return ;;
+            -h|--help) glxc_command_help refs; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
@@ -143,7 +147,7 @@ glxc_command_refs() {
 
     if [ "${#_argv[@]}" -eq 0 ]; then
         nef_log "There are no glxc remotes. You can create one by running:"
-        nef_log "  $0 init <name>"
+        nef_log "  $0 add <name>"
     else
         git show-ref | nef_log_pipe "(local):"
         for _name in "${_argv[@]}"; do
@@ -159,7 +163,7 @@ glxc_command_refs() {
     fi
 }
 
-# command: remote-git <name> <git-command> [arg] ...
+# command: remote-git <name> [--] <git-command> [arg] ...
 #
 ##
 glxc_command_remote-git() {
@@ -167,14 +171,14 @@ glxc_command_remote-git() {
 
     while [ -n "$1" ]; do
         case "$1" in
-            -h) glxc_command_help remote-git; return ;;
+            -h|--help) glxc_command_help remote-git; return ;;
+            --) shift; _argv=("${_argv[@]}" "$@"); shift $# ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _argv=("${_argv[@]}" "$1"); shift ;;
         esac
     done
 
     [ "${#_argv[@]}" -lt 2 ] && nef_fatal_usage_command remote-git "missing argument(s)"
-    [ "${#_argv[@]}" -gt 2 ] && nef_fatal_usage_command remote-git "too many arguments"
 
     local _name="${_argv[0]}"
     unset _argv[0]
@@ -182,7 +186,7 @@ glxc_command_remote-git() {
     state=$(lxc-info -sHn $_name)
     [ "$state" != RUNNING ] && nef_fatal "${_name}: container '${_name}' is ${state} (must be running)"
     nef_log "Running 'glxc git ${_argv[@]}' in container ${_name}:"
-    lxc-attach --clear-env -n $_name -- glxc git ${_argv[@]} | nef_log_pipe "${_name}:"
+    lxc-attach --clear-env -n $_name -- glxc git -- ${_argv[@]} | nef_log_pipe "${_name}:"
     nef_log "Command returned status ${PIPESTATUS[0]}"
 }
 
@@ -200,7 +204,7 @@ glxc_command_help() {
     while [ -n "$1" ]; do
         case "$1" in
             --usage) _usage=1; shift ;;
-            -h) glxc_command_help help; return ;;
+            -h|--help) glxc_command_help help; return ;;
             -*) glxc_eval_common_option "$1"; shift ;;
             *) _command="$1"; break ;;
         esac
@@ -265,7 +269,7 @@ glxc_eval_common_option() {
         -v | --verbose) nef_opt_show_verbose=yes; shift ;;
         -vv | --debug-verbose) nef_opt_show_verbose=yes; nef_opt_show_debug=yes; shift ;;
         -h | --help) nef_show_usage; exit 0 ;;
-        -*) nef_fatal_usage "bad option: $1" ;;
+        -*) nef_fatal "bad option: $1, use -h for usage information" ;;
     esac
 }
 
@@ -311,6 +315,7 @@ glxc_parse_cmdline() {
 
 ######################################################################
 # FROM sysconf.base library
+# https://github.com/geonef/sysconf.base/blob/master/tree/usr/share/nef-common/shell-command
 
 nef_log() {
     [ "x$NEF_LOG_FILE" = x ] && NEF_LOG_FILE="$LOG_FILE" # Legacy compat
