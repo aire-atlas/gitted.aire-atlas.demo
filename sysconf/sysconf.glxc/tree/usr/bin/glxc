@@ -61,13 +61,43 @@ glxc_command_git-remote-command() {
         esac
     done
 
+    glxc_run_hooks pre-git
     glxc_run_git_script export
-    # glxc_export_git_state
-    $_command $GIT_DIR
-    glxc_run_git_script import
-    # glxc_import_git_state
+    glxc_run_hooks pre-git-command
 
-    glxc_show_ip
+    $_command $GIT_DIR
+
+    glxc_run_hooks post-git-command
+    glxc_run_git_script import
+    glxc_run_hooks post-git
+}
+
+# command: git <git-command>
+#
+# Execute the given GIT command on the local repository
+#
+# (mainly for debugging/ingo purposes)
+##
+glxc_command_git() {
+    local _argv=()
+    local _command=
+    local _usage=0
+    local _argv=()
+
+    while [ -n "$1" ]; do
+        case "$1" in
+            --usage) _usage=1; shift ;;
+            -h) glxc_command_help help; return ;;
+            --) shift; _argv=("${_argv[@]}" "$@"); shift $# ;;
+            -*) glxc_eval_common_option "$1"; shift ;;
+            *) _argv=("${_argv[@]}" "$1"); shift ;;
+        esac
+    done
+
+    [ "${#_argv[@]}" -lt 1 ] && nef_fatal_usage_command remote "missing argument(s)"
+
+    cd $GIT_DIR
+    git "${_argv[@]}"
 }
 
 # command: git <git-command>
@@ -99,8 +129,9 @@ glxc_command_git() {
 }
 
 ######################################################################
-# FUNCTIONALITY
+# INTERNAL FUNCTIONALITY
 
+# usage: glxc_run_git_script { import | export }
 glxc_run_git_script() {
     op=$1
     for script in /etc/glxc/sync/*.$op; do
@@ -108,29 +139,20 @@ glxc_run_git_script() {
         export GLXC_GIT_BRANCH=$(echo $name | sed 's/\..*//')
         $script 2>&1 | nef_log_pipe "<$name>"
     done
-    # for module in aire-data mongodb postgresql; do
-    #     /usr/share/glxc/import/$module 2>&1 | nef_log_pipe "<$module>"
-    # done
 }
 
-# glxc_export_git_state() {
-#     nef_log "Exporting GIT state..."
-#     for script in /etc/glxc/sync/*.export; do
-#         name=$(basename $script)
-#         $script 2>&1 | nef_log_pipe "<$name>"
-#     done
-#     # for module in mongodb; do
-#     #     /usr/share/glxc/export/$module 2>&1 | nef_log_pipe "<$module>"
-#     # done
-# }
+# usage: glxc_run_hooks <hook-name>
+glxc_run_hooks() {
+    local _name=$1
+    local _dir=/etc/glxc/hook/${_name}.d
 
-# Show the IP address to help the user
-glxc_show_ip() {
-    ip=$(ip -o -4 addr show dev eth0 primary  | sed -r 's/.* inet ([0-9.]+).*/\1/')
-    nef_log
-    nef_log "*** AIRE service: http://$ip/"
-    nef_log
+    if [ -d $_dir ]; then
+        for hook in $(find $_dir -executable -and -not -type d); do
+            $hook | nef_log_pipe "${hook}:"
+        done
+    fi
 }
+
 
 ######################################################################
 # COMMAND LINE & RUN
