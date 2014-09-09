@@ -78,7 +78,9 @@ _aire_install()
     # Install OpenLayers 2.11rc3
     [ -d /usr/share/javascript/openlayers-2.11rc3 ] || {
         mkdir -p /usr/share/javascript/openlayers-2.11rc3 || nef_fatal "could not mkdir"
-        curl "http://openlayers.org/download/OpenLayers-2.11-rc3.tar.gz" \
+        # OLD URL: url=http://openlayers.org/download/OpenLayers-2.11-rc3.tar.gz
+        url=https://github.com/openlayers/openlayers/archive/release-2.11-rc3.tar.gz
+        curl --location "$url" \
             | tar xzv --strip-components=1 -C /usr/share/javascript/openlayers-2.11rc3 \
             --exclude=doc --exclude=apidoc_config --exclude=examples \
             --exclude=doc_config --exclude=tests \
