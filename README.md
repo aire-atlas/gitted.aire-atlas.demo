@@ -28,8 +28,19 @@ lxc-destroy -f -n vm-atlas-base
 git push vm-atlas-base master
 ```
 
-The atlas is now running.
+The atlas is now running. You may run ```lxc-ls -f``` to know its IP
+address:
+```
+NAME           STATE    IPV4        IPV6  AUTOSTART  
+---------------------------------------------------
+vm-atlas-base  RUNNING  10.0.3.254  -     NO
+```
+
+That output indicates the IP of the atlas:
+* atlas homepage: http://10.0.3.254/
+* atlas admin screen : http://10.0.3.254/admin
 
 
 ## Make your own atlas
+
 
