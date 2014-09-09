@@ -1,0 +1,14 @@
+#!/bin/bash
+#
+
+GITTED_DATA_PATH=gitted/sysconf \
+    /usr/share/gitted/import/sysconf
+
+GITTED_DATA_PATH=aire-data GITTED_AIRE_INSTANCE=demo \
+    /usr/share/gitted/import/aire-data-files
+
+GITTED_DATA_PATH=mongodb GITTED_MONGODB_DATABASE=aire_test GITTED_MONGODB_EXPORT_FORMAT=json \
+    /usr/share/gitted/import/mongodb
+
+GITTED_DATA_PATH=postgresql GITTED_POSTGRESQL_DATABASE=aire \
+    /usr/share/gitted/import/postgresql
