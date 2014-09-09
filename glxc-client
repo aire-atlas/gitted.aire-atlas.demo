@@ -57,6 +57,8 @@ glxc_command_add() {
 
     local _name="${_argv[0]}"
 
+    glxc_ensure_script_in_git_dir
+
     if git remote | grep -q "^${_name} "; then
         echo "Remote '$_name' exists already:"
         git remote -v | grep "^${_name} "
@@ -251,14 +253,33 @@ glxc_ensure_container_running() {
         sleep 1
     fi
 
+    if ! lxc-attach --clear-env -n $_name -- test -f /GLXC_CUSTOM_APPLIED; then
+        glxc_container_apply_customs $_name
+        lxc-attach --clear-env -n $_name -- touch /GLXC_CUSTOM_APPLIED
+    fi
+
     lxc-attach --clear-env -n $_name -- test -d /sysconf || {
-        nef_log "sysconf is not defined. extracting from $glxc_executive_treeish..."
+        nef_log "sysconf is not defined. extracting from commit $glxc_executive_treeish"
         git archive $glxc_executive_treeish glxc/sysconf/ \
             | lxc-attach --clear-env -n $_name -- tar x -C / --strip-components=1 >&2
         lxc-attach --clear-env -n $_name -- \
             /sysconf/sysconf.base/tree/usr/bin/sysconf compile install update \
             2>&1 | nef_log_pipe "sysconf@$_name:"
     }
+}
+
+glxc_container_apply_customs() {
+    local _name=$1
+
+    # SSH public key
+    if [ -f ~/.ssh/id_dsa.pub ]; then
+        nef_log "copy ~/.ssh/id_dsa.pub to ${_name}:/root/.ssh/authorized_keys's "
+        cat ~/.ssh/id_dsa.pub \
+            | lxc-attach --clear-env -n $_name \
+            -- sh -c 'mkdir -p /root/.ssh && cat >/root/.ssh/authorized_keys'
+    fi
+
+    # TODO: set GIT config for user.name and user.email
 }
 
 ######################################################################
