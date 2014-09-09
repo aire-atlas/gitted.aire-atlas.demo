@@ -1,6 +1,9 @@
-# Installer script for sysconf "nef.service.aire"  -*- shell-script -*-
+# Installer script for sysconf "sysconf.glxc"  -*- shell-script -*-
 
 . /usr/lib/sysconf.base/common.sh
+
+[ -x /usr/lib/git-core/git-subtree ] \
+    || ln -s git-subtree-from-sysconf /usr/lib/git-core/git-subtree
 
 # Fix /etc/host with our hostname
 # (and avoid Apache's "apr_sockaddr_info_get() failed" error)
