@@ -1,0 +1,17 @@
+﻿<?php
+include('inc/menu_maptypes.php');
+
+// FRANCAIS
+$title_fr ='Représensentations cartographiques';
+$content_fr = '<h2>Carroyage</h2>';
+$content_fr .='<p><img src="images/schema_grid.jpg"/></p>';
+$content_fr .='<p>La représentation cartographique s’appuie, le plus souvent, sur un maillage administratif qui est un filtre spatial de l’information géographique. Ce filtre déforme d’autant plus le message véhiculé par la carte que le maillage est hétérogène. Ceci est le cas en Europe où, par exemple, au niveau NUTS3, la plus petite unité administrative a une superficie de 13km2 alors que la plus grande a une superficie de 98249km2 (3300km2 en moyenne). La méthode du carroyage est une des possibilités pour essayer de s\'affranchir de l\'arbitraire et de l\'irrégularité d\'un découpage administratif. Elle met en évidence les grandes tendances de le répartition spatiale d\'une donnée et de traiter des données, en découpant le territoire en « carreaux égaux et repérés » (Les mots de la géographie). La donnée y est répartie sur un quadrillage régulier, dans un système de projection donné, apposé sur la carte. La donnée obtenue par carreau est discrétisée puis affichée sur le quadrillage en plages de couleurs. Le principe retenu ici consiste à affecter aux carreaux de la grille, les stocks associés au maillage administratif, en fonction de la surface couverte par chaque carreau (affectation des valeurs au prorata de la surface). L’affectation des données sur la grille reste alors dépendant du maillage administratif sous jacent. 4 Carroyages à résolutions différentes sont utilisés dans le cadre de ce projet (50km, 100km, 200km et 300km). Ces euils de résolutions correspondent à un lien spatial entre niveau de nuts et taille de grille. </p>';
+$content_fr .=$MenuMapType_fr;
+
+
+// ANGLAIS
+$title_en ='Map types';
+$content_en = '<h2>Grid choropleth map</h2>';
+$content_en .='<p><img src="images/schema_grid.jpg"/></p>';
+$content_en .= '<p>The cartographic representation mostly relies on an administrative meshing which is a spatial filter of the geographical information. This filter deforms all the more the message conveyed by the map as the meshing is heterogeneous. This is the case in Europe where, for example, at the level NUTS3, the smallest administrative unit has a surface of 13km2 while the biggest has a surface of 98249km2 (3300km2 on average). The grid-cell method is an option to try to overcome the arbitrariness and irregularity of administrative division. It highlights the main trends in the data spatial distribution, cutting the territory into "equal and marked squares». The data is distributed over a regular grid in a given projection system, displayed on the map. The data obtained by tile is discretized and then displayed on the grid in areas of color. The principle adopted here is to set in the grid, for each tile, stocks which are associated with the administrative division, depending on the area covered by each tile (assigning values in proportion to the surface). Four grids with different resolutions are used in AIRE: 50 km, 100 km, 200 km and 300 km. These thresholds resolutions correspond to a spatial link between the level of nuts and grid size. </p>';
+$content_en .=$MenuMapType_en;

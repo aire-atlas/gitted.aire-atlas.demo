@@ -1,0 +1,90 @@
+body {
+    font-family: verdana;
+    font-size: 12px;
+    margin: 0px;
+    padding: 0px;
+	overflow:hidden;
+}
+
+#contain{
+position:absolute;
+top: 0px;
+left: 0px;
+margin: 0px;
+padding: 0px;
+width: 100%;	
+height: 100%;
+overflow: hidden; 
+}
+
+#left{
+position:absolute;
+top: 0px;
+left: 0px;
+width:543px;
+height:483px;
+text-align:left;
+background-color:white;
+}
+
+#right{
+position:absolute;
+top: 3px;
+left: 542px;
+width:190x;
+height:457px;
+text-align:left;
+padding:10px;
+background-color:#3460A6;
+background-color:#E6DFD4;
+}
+
+.titre{
+	font-family: arial, helvetica, sans-serif ;
+	font-weight:bold;
+	font-size: 14pt ;
+	color: #1C4F6D ;
+}
+.corps{
+	font-family: arial, helvetica, sans-serif ;
+	font-size: 10pt ;
+	color: #558299 ;
+	text-align:justify;
+}
+
+.corps2{
+	font-family: arial, helvetica, sans-serif ;
+	font-size: 11pt ;
+	color: #1C4F6D ;
+	font-weight:bold;
+
+}
+
+table {
+border:none;
+width: 100%;
+margin: 0px;
+padding: 0px;
+color: #1C4F6D;
+text-align:center;
+}
+
+.tab1{
+width:50%;
+font-family: verdana;
+font-size: 13px;
+font-weight:bold;
+}
+
+.tab2 {
+width:50%;
+font-family: verdana;
+font-size: 9px;
+font-style:italic;
+
+}
+
+
+a   {color:#58585A;text-decoration:none;font-family: Verdana;font-size: 12px; }
+a:hover   {color:#B3071B;text-decoration:underline;} 
+img {border: none;}

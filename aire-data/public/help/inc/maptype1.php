@@ -1,0 +1,17 @@
+﻿<?php
+include('inc/menu_maptypes.php');
+
+// FRANCAIS
+$title_fr ='Représensentations cartographiques';
+$content_fr = '<h2>Cartes de stock</h2>';
+$content_fr .='<p><img src="images/schema_stock.jpg"/></p>';
+$content_fr .='<p>Les cartes de stock permettent de représenter des données de stocks. Ces données sont de nature quantitative brute ou absolue. Une donnée est dite « quantitative » si ses modalités s\'expriment par des nombres et si la moyenne de ces nombres a un sens. Elles expriment des quantités concrètes : la somme des modalités des éléments a un sens (ex : la population est une donnée de stock car la somme de plusieurs populations a un sens). Ces données sont à la base de toute l’information géographique présentée dans cet atlas. En effet, c’est à partir de ces données brutes que l’ensemble des autres données ont été calculées et traitées. Pour l’ensemble des pays de l’Union Européenne, elles proviennent du site Eurostat 2007. Pour la Suisse et la Norvège, elles sont issues de la base de données ESPON 2006. La représentation cartographique des données de stock est soumise à des règles de sémiologie graphique très strictes. Quelle que soit l’implantation (ponctuelle, linéaire ou zonale), il faut utiliser une variable visuelle traduisant visuellement les quantités brutes et permettant de traduire la variation de distance qu’il existe entre les données : la seule variable visuelle possible est la TAILLE. La taille renvoie à la variation de surface, de longueur, de hauteur ou de volume d’un figuré. Elle est le seul moyen graphique qui permette d’obtenir un rapport de proportionnalité lié au poids des figurés et donc de traduire directement des quantités brutes. </p>';
+$content_fr .=$MenuMapType_fr;
+
+
+// ANGLAIS
+$title_en ='Map types';
+$content_en = '<h2>Raw data map</h2>';
+$content_en .='<p><img src="images/schema_stock.jpg"/></p>';
+$content_en .= '<p>Absolute value (stock) data maps enable representation of quantitative data which can be raw data or expressed in absolute terms.  A data is quantitative if it can be expressed in units that can be aggregated and their averages are meaningful. This data express concrete quantity, i.e, the sum of individual elements is meaningful; e.g. population size is an absolute value because the sum of a number of different population sizes is meaningful. This atlas was built using geographical data. Raw data from which the sets of data used to build the maps were extracted from Eurostat 2010 database for the European Union and ESPON 2010 database for Switzerland and Norway. Map representation of absolute value data (stock) must conform to strict graphic semiology rules. Irrespective of the kind of geographic information represented on a map (points, lines or areas), a graphic variable corresponding to gross quantity must be used to indicate the variation in distance between data. In other words, the only visual variable that can be used in this case is SIZE.  Size refers to change in area, length, height or volume of an object. Size is the only concept enabling to establish proportions related to weight of objects that are the subject of analysis. It enables to analyze raw data and derive percentages and rates.</p>';
+$content_en .=$MenuMapType_en;
