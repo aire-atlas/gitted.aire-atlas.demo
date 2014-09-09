@@ -1,0 +1,415 @@
+#!/bin/bash
+#
+# nef-update-aire - install/update of multiple instances of app AIRE
+#
+# AIRE means in French "Interactive Atlas of European Regions
+#
+# Usage: $0 <profile-name>
+#
+# This script installs (if missing) or updates (if present) the AIRE instance
+# for the given name, that should lie into /etc/aire/instances/
+#
+# Profile options:
+#
+#   APP_AIRE_SOURCE_PATH (mandatory)
+#       Source sync directory
+#
+#
+
+. /usr/lib/sysconf.base/common.sh
+
+
+##################################################
+# DEFAULTS / INITS
+
+APP_AIRE_DEFAULT_CONFIG_FILE=/etc/default/aire
+APP_AIRE_INSTANCE_CONFIG_DIR=/etc/aire/instances
+APP_AIRE_INSTANCE_BASE_DIR=/var/lib/aire
+APP_AIRE_GIT_UPSTREAM_URL=https://github.com/aire-atlas/aire.git
+APP_AIRE_GIT_BRANCH=aire2
+APP_AIRE_APACHE2_CONFIG_PREFIX=generated.app.aire.
+APP_AIRE_APACHE2_CONFIG_SUFFIX=.conf
+
+APP_AIRE_INSTANCE_GENERATE_APACHE2=yes
+APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2=no
+APP_AIRE_INSTANCE_ENV=test
+APP_AIRE_INSTANCE_GIT_DEPTH=0
+APP_AIRE_INSTANCE_CONFIG_EXTRA=""
+APP_AIRE_INSTANCE_USER=aire
+APP_AIRE_INSTANCE_GROUP=www-data
+sudo_aire="sudo -u $APP_AIRE_INSTANCE_USER"
+
+show_usage() { app_aire_command_help; }
+app_aire_command_help()
+{
+    Z=$(basename $0)
+    cat <<EOF
+Usage: $Z [options] [<command> [...]]
+
+
+  <command> is one of:
+
+    usage [<instance>]
+        Print help about what to do next:
+          - how to install a new instance
+          - listing and check suggestions
+        List available instances in ${APP_AIRE_INSTANCE_CONFIG_DIR} and
+
+    help
+        Show command invocation syntax and options
+
+    list
+        Show the list of instances which have been configured
+
+    status
+        Show information about DB and HTTP services
+
+    env [<instance>]
+        Print definition of instance <instance>, or all
+
+    install <instance>
+        Install or complete installation
+
+    fixperms <instance>
+        Fix group ownership and permissions
+
+  <instance> is the lower-case instance name (like "prod", "test", etc.)
+  that matches the file /etc/aire/instances/<instance>.conf which
+  defines its environment.
+
+Options:
+    -v, --verbose       Print more messages
+
+    -h, --help
+        Show usage help
+
+    -p, --help-profile
+        Print documentation about profile
+
+Type "$Z -p" to read the doc about instance definitions...
+EOF
+}
+show_options()
+{
+    cat <<EOF
+
+*********** 1 AIRE instance = 1 profile file in /etc/aire/instances ************
+
+The whole thing works by using shell/environment variables, which are prefixed
+with "APP_AIRE_" and always upper-case.
+
+- common options lie into the /etc/default/aire using common bash definitions
+- instance-specific options lie into /etc/instances/INSTANCE.conf
+- options can be given at runtime by setting them as UNIX environment variables,
+  for example:
+    # APP_AIRE_DEFAULT_CONFIG=/usr/local/etc/default/aire nef-update-aire myinstance
+
+NOTE: the AIRE application has system dependencies that are managed automatically
+      by the install.sh script of the "sysconf.app.aire" SYSCONF profile
+      (which means, just run "sysconf update" and it should be automatic).
+
+Instance options:
+  APP_AIRE_INSTANCE_DIR [$APP_AIRE_INSTANCE_DIR]
+      Path to the installation directory of current instance
+
+  APP_AIRE_INSTANCE_DOMAIN [${APP_AIRE_INSTANCE_DOMAIN}]
+      Website HTTP domain for instance
+
+  APP_AIRE_INSTANCE_GENERATE_APACHE2 (yes/no) [${APP_AIRE_INSTANCE_GENERATE_APACHE2}]
+      Generate virtual host definition into /etc/apache2/sites-available/
+
+  APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2 (yes/no) [${APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2}]
+      Create the symlink into /etc/apache2/sites-enabled/
+
+General options:
+
+  APP_AIRE_DEFAULT_CONFIG_FILE [${APP_AIRE_DEFAULT_CONFIG_FILE}]
+      Path to common AIRE configuration (common to all instances)
+
+  APP_AIRE_INSTANCE_CONFIG_DIR [${APP_AIRE_INSTANCE_CONFIG_DIR}]
+      Path to directory containing the instances files
+
+  APP_AIRE_INSTANCE_BASE_DIR [${APP_AIRE_INSTANCE_BASE_DIR}]
+      Path to directory containing the instances' installations
+
+  APP_AIRE_GIT_UPSTREAM_URL [${APP_AIRE_GIT_UPSTREAM_URL}]
+      URL of GIT repository to clone the AIRE source from.
+      (this different from the SYSCONF template "sysconf.app.aire"
+       that this updater script is part of)
+
+  APP_AIRE_INSTANCE_GIT_DEPTH [${APP_AIRE_INSTANCE_GIT_DEPTH}]
+      Value of --depth option to the 'git clone' command, see man 1 git-clone.
+      Set 0 if you want to be able to edit+commit the AIRE sources of the instance,
+      this will disable the --depth option and get a full versionned Git repos clone.
+
+  APP_AIRE_APACHE2_CONFIG_PREFIX [${APP_AIRE_APACHE2_CONFIG_PREFIX}]
+      Prefix that is used to compose the Apache2 config file out of instance name
+
+  APP_AIRE_APACHE2_CONFIG_SUFFIX [${APP_AIRE_APACHE2_CONFIG_SUFFIX}]
+      Suffix that is used to compose the Apache2 config file out of instance name
+
+EOF
+}
+
+app_aire_command_usage()
+{
+    nef_log "CHECKING SYSTEM SERVICES"
+
+    nef_log ""
+    nef_log "Checking MongoDB..."
+    failures=0
+
+    if [ $(ps aux | grep mongodb | grep -vq grep | wc -l) -ne 0 ]; then
+        nef_log "  RUNNING!"
+    else
+        nef_log "  MongoDB process not running. Checking..."
+        if [ -f /var/lib/mongodb/mongod.lock ]; then
+            nef_log "removing lock file: /var/lib/mongodb/mongod.lock"
+            rm -f /var/lib/mongodb/mongod.lock
+        fi
+        nef_log "  Trying to start MongoDB..."
+        service mongodb start || {
+            nef_log "  could not run MongoDB. Check the log"
+            nef_log "    /var/log/mongodb/mongodb.log"
+            failures=$(($failures + 1))
+        }
+    fi
+
+    nef_log ""
+    nef_log "Checking Apache2..."
+    if service apache2 status; then
+        nef_log "  RUNNING!"
+    else
+        failures=$(($failures + 1))
+        nef_log "  Not running. Run:"
+        nef_log "    service apache2 start"
+        nef_log ""
+        nef_log "  If it does not work, check the log:"
+        nef_log "    tail /var/log/apache2/error.log"
+    fi
+
+    nef_log ""
+    nef_log "Checking PostgreSQL..."
+    if service postgresql status; then
+        nef_log "  RUNNING!"
+    else
+        failures=$(($failures + 1))
+        nef_log "  Not running. Run:"
+        nef_log "    service postgresql start"
+        nef_log ""
+        nef_log "  If it does not work, check the logs:"
+        nef_log "    ls -l /var/log/postgresql/"
+    fi
+
+    nef_log ""
+    if [ $failures -eq 0 ]; then
+        nef_log "EVERYTHING WAS ALL RIGHT"
+    else
+        nef_log "$failures failures"
+        nef_log ""
+        nef_log "In case the system setup was not complete, consider running:"
+        nef_log "  sysconf update"
+    fi
+
+    nef_log "  sysconf update"
+    nef_log ""
+    nef_log "CHECKING AIRE INSTANCES"
+
+    profiles=$(find ${APP_AIRE_INSTANCE_CONFIG_DIR} -name '*.conf')
+    count=$(ls $profiles | wc -l)
+    nef_log "  There are $count instances defined in ${APP_AIRE_INSTANCE_CONFIG_DIR}"
+    for profile in $profiles; do
+        name=$(basename $profile .conf)
+        nef_log "  Instance definition: $profile"
+        nef_log "  To install/fix, type:"
+        nef_log "    $0 install $name"
+    done
+
+    if [ $count -eq 0 ]; then
+        nef_log ""
+        nef_log "  To get documentation about create a new AIRE instance:"
+        nef_log "    $0 -p"
+    fi
+
+}
+
+app_aire_command_service()
+{
+    failure=0
+
+
+    return $failure
+}
+
+app_aire_command_service()
+{
+    failure=0
+
+    service mongodb status || failure=1
+    service apache2 status || failure=1
+    service postgresql status || failure=1
+
+    return $failure
+}
+
+app_aire_command_env()
+{
+    app_aire_load_instance
+
+    echo "# Definition of AIRE instance '$APP_AIRE_INSTANCE_NAME'"
+    echo "# merged after $APP_AIRE_INSTANCE_FILE"
+    echo "#"
+    ( set -o posix ; set ) | grep APP_AIRE_
+}
+
+
+##################################################
+# INSTALLATION/UPDATE
+
+app_aire_command_install()
+{
+    app_aire_load_instance
+
+    aire_setup_instance
+    aire_setup_apache2
+}
+
+aire_setup_instance()
+{
+    nef_log "Checking AIRE instance '${APP_AIRE_INSTANCE_NAME}' for website '${APP_AIRE_INSTANCE_DOMAIN}'..."
+
+    [ -d ${APP_AIRE_INSTANCE_BASE_DIR} ] \
+        || mkdir ${APP_AIRE_INSTANCE_BASE_DIR} \
+        || nef_fatal "could not create instance base dir"
+
+    [ -d ${APP_AIRE_INSTANCE_DIR} ] || {
+        nef_log "Installing ${APP_AIRE_INSTANCE_DIR} ..."
+        git_options="--recursive --single-branch"
+        if test "x$APP_AIRE_INSTANCE_GIT_DEPTH" != "x0"; then
+            git_options="$git_options --depth $APP_AIRE_INSTANCE_GIT_DEPTH"
+        fi
+        git clone $git_options -b ${APP_AIRE_GIT_BRANCH} ${APP_AIRE_GIT_UPSTREAM_URL} ${APP_AIRE_INSTANCE_DIR} || \
+            nef_fatal "git clone failed"
+        cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "cloned dir not found"
+
+        # Fix owner group
+        chgrp -R $APP_AIRE_INSTANCE_GROUP .
+        chmod -R g+w .
+        find . -type d -exec chmod g+s {} \;
+
+        $sudo_aire git submodule init
+        $sudo_aire git submodule update
+    }
+    cd ${APP_AIRE_INSTANCE_DIR}
+
+    [ -h app/instance ] || $sudo_aire ln -s instances/${APP_AIRE_INSTANCE_ENV} app/instance
+
+    if [ ! -d app/cache/${APP_AIRE_INSTANCE_ENV}/public ]; then
+        nef_log "Generating website static files..."
+        $sudo_aire app/console zig:install:update-public && \
+            $sudo_aire app/console zig:install:build-openlayers && \
+            $sudo_aire app/console zig:app:sync-translations && \
+            $sudo_aire app/console zig:install:run-shrinksafe \
+            || nef_fatal "aire app/console command failed"
+    fi
+    nef_log "Fixing files ownership and permissions..."
+    # note: redundant with 'app_aire_command_fixperms'
+    chgrp -R $APP_AIRE_INSTANCE_GROUP . \
+        && chmod -R g+w . \
+        && find . -type d -exec chmod g+s {} \;
+}
+
+aire_setup_apache2()
+{
+    # Setup Apache virtual host
+    if test "$APP_AIRE_INSTANCE_GENERATE_APACHE2" = "yes"; then
+        apache_file_name=${APP_AIRE_APACHE2_CONFIG_PREFIX}${APP_AIRE_INSTANCE_NAME}${APP_AIRE_APACHE2_CONFIG_SUFFIX}
+        apache_config_path=/etc/apache2/sites-available/${apache_file_name}
+
+        nef_log "Generating ${apache_config_path}"
+        nef_template_apply_file /usr/share/aire/templates/etc.apache2.vhost.conf \
+            >/etc/apache2/sites-available/${apache_file_name}
+
+        if test "$APP_AIRE_INSTANCE_AUTO_ENABLE_APACHE2" = "yes"; then
+            symlink=/etc/apache2/sites-enabled/${apache_file_name}
+
+            if test -h $symlink; then
+                nef_log "Symlink exists already, fine: $symlink"
+            else
+                nef_log "Enabling Apache2 website through symlink: $symlink"
+                ln -s ../sites-available/${apache_file_name} $symlink
+            fi
+        fi
+        nef_log "Reloading Apache \"gracefully\""
+        apache2ctl -S && apache2ctl graceful
+    fi
+}
+
+
+app_aire_command_fixperms()
+{
+    app_aire_load_instance
+
+    cd ${APP_AIRE_INSTANCE_DIR} || nef_fatal "could not chdir to instance dir"
+    nef_log "Fixing GROUP to '$APP_AIRE_INSTANCE_GROUP' and permissions..."
+    chgrp -R $APP_AIRE_INSTANCE_GROUP . \
+        && chmod -R g+w . \
+        && find . -type d -exec chmod g+s {} \;
+}
+
+######################################################################
+# UTIL FUNCTIONS
+
+# MERGE instance config
+app_aire_load_instance()
+{
+    [ "x$APP_AIRE_INSTANCE_NAME" = "x" ] && nef_usage_error "missing AIRE instance name"
+
+    [ -f $APP_AIRE_DEFAULT_CONFIG_FILE ] && . $APP_AIRE_DEFAULT_CONFIG_FILE
+
+    APP_AIRE_INSTANCE_FILE=$APP_AIRE_INSTANCE_CONFIG_DIR/$APP_AIRE_INSTANCE_NAME.conf
+    [ -f $APP_AIRE_INSTANCE_FILE ] || nef_fatal "Instance file does not exist: $APP_AIRE_INSTANCE_FILE"
+    . $APP_AIRE_INSTANCE_FILE
+
+    [ "x$APP_AIRE_INSTANCE_DIR" = "x" ] && APP_AIRE_INSTANCE_DIR=$APP_AIRE_INSTANCE_BASE_DIR/$APP_AIRE_INSTANCE_NAME
+}
+
+
+######################################################################
+# COMMAND LINE PARSING
+
+app_aire_opt_verbose=no
+app_aire_command_argv=()
+
+while [ "$1" != "" ]; do
+
+    case "$1" in
+        -v | --verbose) app_aire_opt_verbose=yes; shift ;;
+        -h|--help) show_usage; exit 0 ;;
+        -p|--help-profile) show_options; exit 0 ;;
+        -*) nef_usage_error "bad option: '$1'" ;;
+        *)
+            # if [ ${#app_aire_command_argv[@]} -eq 1 ]; then
+            #     APP_AIRE_INSTANCE_NAME=$1
+            # fi
+            if [ "x$APP_AIRE_INSTANCE_NAME" = x -a ${#app_aire_command_argv[@]} -eq 1 ]; then
+                APP_AIRE_INSTANCE_NAME=$1
+            else
+                app_aire_command_argv=(${app_aire_command_argv[@]} "$1")
+            fi
+            shift ;;
+    esac
+
+done
+
+[ "x${app_aire_command_argv[0]}" = "x" ] && app_aire_command_argv=(usage)
+
+
+
+######################################################################
+# RUNTIME
+
+app_aire_command_function_name="app_aire_command_${app_aire_command_argv[0]}"
+$app_aire_command_function_name "${app_aire_command_argv[@]}" \
+    || nef_fatal "command ${app_aire_command_argv[0]} returned status $?"
+# nef_log "Command returned successfully."

@@ -1,0 +1,8 @@
+#!/bin/bash
+#
+
+GITTED_DATA_PATH=gitted/sysconf \
+    /usr/share/gitted/export/sysconf
+
+GITTED_DATA_PATH=mongodb GITTED_MONGODB_DATABASE=aire_test GITTED_MONGODB_FORMAT=json \
+    /usr/share/gitted/export/mongodb
