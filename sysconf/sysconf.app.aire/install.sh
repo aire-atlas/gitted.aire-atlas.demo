@@ -84,7 +84,7 @@ _aire_install()
             | tar xzv --strip-components=1 -C /usr/share/javascript/openlayers-2.11rc3 \
             --exclude=doc --exclude=apidoc_config --exclude=examples \
             --exclude=doc_config --exclude=tests \
-            || nef_fatal "could not download or extract OpenLayers archive"
+            || nef_fatal "could not download or extract OpenLayers archive from: $url"
     }
 
     # Install Proj4JS 1.0.1
