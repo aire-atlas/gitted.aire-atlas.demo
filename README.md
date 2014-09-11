@@ -19,7 +19,7 @@ sync.
 ## Install & start the base atlas
 
 ```
-git clone https://github.com/aire-atlas/atlas-base.git && cd my-atlas
+git clone https://github.com/aire-atlas/atlas-base.git && cd atlas-base
 sysconf/gitted-client register && sysconf/gitted-client add vm-atlas-base
 git push vm-atlas-base master
 ```
