@@ -1,7 +1,9 @@
 # A base repository to build AIRE-based atlas websites
 
-The Atlas is packaged using GITTED, which use the LXC containers to
-make it run, and GIT for updates, backups and data sync.
+The Atlas is packaged using
+[**Gitted**](https://github.com/geonef/sysconf.gitted), which use the
+LXC containers to make it run, and GIT for updates, backups and data
+sync.
 
 * [LXC](https://linuxcontainers.org/) pseudo-virtualization technology
   running on Linux
@@ -18,7 +20,7 @@ make it run, and GIT for updates, backups and data sync.
 
 ```
 git clone https://github.com/aire-atlas/atlas-base.git && cd my-atlas
-gitted/gitted-client register && gitted/gitted-client add vm-atlas-base
+sysconf/gitted-client register && sysconf/gitted-client add vm-atlas-base
 git push vm-atlas-base master
 ```
 
