@@ -11542,67 +11542,132 @@ ALTER SEQUENCE anam_eu34_nuts2006_popt2007_ogc_fid_seq OWNED BY anam_eu34_nuts20
 
 
 --
--- Name: data_2010_environment; Type: TABLE; Schema: public; Owner: aire; Tablespace:
+-- Name: data_population; Type: TABLE; Schema: public; Owner: aire; Tablespace:
 --
 
-CREATE TABLE data_2010_environment (
-    id character(6),
-    name character varying,
-    nutsversion integer,
+CREATE TABLE data_population (
+    ogc_fid integer NOT NULL,
+    oldid character varying(6),
     level character varying,
-    area_t2011 double precision,
-    artificial_surfaces double precision,
-    agricultural_areas double precision,
-    forest_and_semi_natural_areas double precision,
-    wetlands double precision,
-    water_bodies double precision,
-    urban_fabric double precision,
-    industrial_commercial_and_transport_units double precision,
-    mine_dump_and_construction_sites double precision,
-    artificial_non_agricultural_vegetated_areas double precision,
-    arable_land double precision,
-    permanent_crops double precision,
-    pastures double precision,
-    heterogeneous_agricultural_areas double precision,
-    forests double precision,
-    scrub_and_or_herbaceous_vegetation_associations double precision,
-    open_spaces_with_little_or_no_vegetation double precision,
-    inland_wetlands double precision,
-    maritime_wetlands double precision,
-    inland_waters double precision,
-    marine_waters double precision
+    nuts_version integer,
+    name character varying,
+    popt_2007 integer,
+    source1 character varying,
+    popf_2007 integer,
+    source2 character varying,
+    popm_2007 integer,
+    source3 character varying,
+    popf0_4_2007 integer,
+    source4 character varying,
+    popf5_9_2007 integer,
+    source5 character varying,
+    popf10_14_2007 integer,
+    source6 character varying,
+    popf15_19_2007 integer,
+    source7 character varying,
+    popf20_24_2007 integer,
+    source8 character varying,
+    popf25_29_2007 integer,
+    source9 character varying,
+    popf30_34_2007 integer,
+    source10 character varying,
+    popf35_39_2007 integer,
+    source11 character varying,
+    popf40_44_2007 integer,
+    source12 character varying,
+    popf45_49_2007 integer,
+    source13 character varying,
+    popf50_54_2007 integer,
+    source14 character varying,
+    popf55_59_2007 integer,
+    source15 character varying,
+    popf60_64_2007 integer,
+    source16 character varying,
+    popf65_69_2007 integer,
+    source17 character varying,
+    popf70_74_2007 integer,
+    source18 character varying,
+    popf75_79_2007 integer,
+    source19 character varying,
+    popf80_84_2007 integer,
+    source20 character varying,
+    popf85_over_2007 integer,
+    source21 character varying,
+    popm0_4_2007 integer,
+    source22 character varying,
+    popm5_9_2007 integer,
+    source23 character varying,
+    popm10_14_2007 integer,
+    source24 character varying,
+    popm15_19_2007 integer,
+    source25 character varying,
+    popm20_24_2007 integer,
+    source26 character varying,
+    popm25_29_2007 integer,
+    source27 character varying,
+    popm30_34_2007 integer,
+    source28 character varying,
+    popm35_39_2007 integer,
+    source29 character varying,
+    popm40_44_2007 integer,
+    source30 character varying,
+    popm45_49_2007 integer,
+    source31 character varying,
+    popm50_54_2007 integer,
+    source32 character varying,
+    popm55_59_2007 integer,
+    source33 character varying,
+    popm60_64_2007 integer,
+    source34 character varying,
+    popm65_69_2007 integer,
+    source35 character varying,
+    popm70_74_2007 integer,
+    source36 character varying,
+    popm75_79_2007 integer,
+    source37 character varying,
+    popm80_84_2007 integer,
+    source38 character varying,
+    popm85_over_2007 integer,
+    source39 character varying,
+    popfem_0_15_2007 integer,
+    source40 character varying,
+    popfem_15_64_2007 integer,
+    source41 character varying,
+    popfem_65_over_2007 integer,
+    source42 character varying,
+    popmale_0_15_2007 integer,
+    source43 character varying,
+    popmale_15_64_2007 integer,
+    source44 character varying,
+    popmale_65_over_2007 integer,
+    source45 character varying,
+    nbdeath_2007 double precision,
+    source46 character varying,
+    nbbirth_2007 double precision,
+    source47 character varying,
+    lifeexpectfem_2007 double precision,
+    source48 character varying,
+    lifeexpectmale_2007 double precision,
+    source49 character varying,
+    lifeexpecttot_2007 double precision,
+    source50 character varying,
+    totfertrate_2007 double precision,
+    source51 character varying,
+    id character(6),
+    nombre_un integer,
+    pop_0_15_2007 integer,
+    pop_15_64_2007 integer,
+    pop_65_over_2007 integer
 );
 
 
-ALTER TABLE public.data_2010_environment OWNER TO aire;
+ALTER TABLE public.data_population OWNER TO aire;
 
 --
--- Name: data_2010_population; Type: TABLE; Schema: public; Owner: aire; Tablespace:
+-- Name: data_population_ogc_fid_seq; Type: SEQUENCE; Schema: public; Owner: aire
 --
 
-CREATE TABLE data_2010_population (
-    id character(6),
-    name character varying,
-    nutsversion integer,
-    level character varying,
-    birth2010 double precision,
-    death2010 double precision,
-    pop_t2011 double precision,
-    pop_0_14_t2009 double precision,
-    pop_15_64_t2009 double precision,
-    pop_65plus_t2009 double precision,
-    pop_age_t2009 double precision,
-    pop_t2008 double precision
-);
-
-
-ALTER TABLE public.data_2010_population OWNER TO aire;
-
---
--- Name: data_2010_population_popt_2008_seq; Type: SEQUENCE; Schema: public; Owner: aire
---
-
-CREATE SEQUENCE data_2010_population_popt_2008_seq
+CREATE SEQUENCE data_population_ogc_fid_seq
     START WITH 1
     INCREMENT BY 1
     NO MAXVALUE
@@ -11610,13 +11675,94 @@ CREATE SEQUENCE data_2010_population_popt_2008_seq
     CACHE 1;
 
 
-ALTER TABLE public.data_2010_population_popt_2008_seq OWNER TO aire;
+ALTER TABLE public.data_population_ogc_fid_seq OWNER TO aire;
 
 --
--- Name: data_2010_population_popt_2008_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: aire
+-- Name: data_population_ogc_fid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: aire
 --
 
-ALTER SEQUENCE data_2010_population_popt_2008_seq OWNED BY data_2010_population.pop_t2008;
+ALTER SEQUENCE data_population_ogc_fid_seq OWNED BY data_population.ogc_fid;
+
+
+--
+-- Name: data_environment; Type: TABLE; Schema: public; Owner: aire; Tablespace:
+--
+
+CREATE TABLE data_environment (
+    ogc_fid integer NOT NULL,
+    level character varying,
+    nuts_version integer,
+    area_t_2008 double precision,
+    source1 character varying,
+    area_t_gis_2008 double precision,
+    source2 character varying,
+    artificial_lands_2000 integer,
+    source3 character varying,
+    agricultural_areas_2000 integer,
+    source4 character varying,
+    forest_semi_nat_areas_2000 integer,
+    source5 character varying,
+    wetlands_area_2000 integer,
+    source6 character varying,
+    waterbodies_areas_2000 integer,
+    source7 character varying,
+    urban_fabric_areas_2000 integer,
+    source8 character varying,
+    industr_comm_transp_areas_2000 integer,
+    source9 character varying,
+    mine_dump_constr_areas_2000 integer,
+    source10 character varying,
+    artificial_non_agric_areas_2000 integer,
+    source11 character varying,
+    arable_land_areas_2000 integer,
+    source12 character varying,
+    permanent_crops_areas_2000 integer,
+    source13 character varying,
+    pastures_areas_2000 integer,
+    source14 character varying,
+    heterogeneous_agr_areas_2000 integer,
+    source15 character varying,
+    forests_areas_2000 integer,
+    source16 character varying,
+    scrub_herbaceous_areas_2000 integer,
+    source17 character varying,
+    open_spaces_littleveget_areas_2000 integer,
+    source18 character varying,
+    inland_wetlands_areas_2000 integer,
+    source19 character varying,
+    maritime_wetlands_area_2000 integer,
+    source20 character varying,
+    inland_waters_area_2000 integer,
+    source21 character varying,
+    marine_waters_area_2000 integer,
+    source22 character varying,
+    total_clc_area_2000 integer,
+    source23 character varying,
+    id character(6)
+);
+
+
+ALTER TABLE public.data_environment OWNER TO aire;
+
+--
+-- Name: data_environment_ogc_fid_seq; Type: SEQUENCE; Schema: public; Owner: aire
+--
+
+CREATE SEQUENCE data_environment_ogc_fid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MAXVALUE
+    NO MINVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.data_environment_ogc_fid_seq OWNER TO aire;
+
+--
+-- Name: data_environment_ogc_fid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: aire
+--
+
+ALTER SEQUENCE data_environment_ogc_fid_seq OWNED BY data_environment.ogc_fid;
 
 
 --
@@ -11833,6 +11979,20 @@ ALTER TABLE public.spatial_ref_sys OWNER TO aire;
 --
 
 ALTER TABLE anam_eu34_nuts2006_popt2007 ALTER COLUMN ogc_fid SET DEFAULT nextval('anam_eu34_nuts2006_popt2007_ogc_fid_seq'::regclass);
+
+
+--
+-- Name: ogc_fid; Type: DEFAULT; Schema: public; Owner: aire
+--
+
+ALTER TABLE data_population ALTER COLUMN ogc_fid SET DEFAULT nextval('data_population_ogc_fid_seq'::regclass);
+
+
+--
+-- Name: ogc_fid; Type: DEFAULT; Schema: public; Owner: aire
+--
+
+ALTER TABLE data_environment ALTER COLUMN ogc_fid SET DEFAULT nextval('data_environment_ogc_fid_seq'::regclass);
 
 
 --
