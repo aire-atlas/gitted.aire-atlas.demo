@@ -6,3 +6,6 @@ GITTED_DATA_PATH=sysconf \
 
 GITTED_DATA_PATH=mongodb GITTED_MONGODB_DATABASE=aire_test GITTED_MONGODB_FORMAT=json \
     /usr/share/gitted/export/mongodb
+
+GITTED_DATA_PATH=postgresql GITTED_POSTGRESQL_DATABASE=aire \
+    /usr/share/gitted/export/postgresql
