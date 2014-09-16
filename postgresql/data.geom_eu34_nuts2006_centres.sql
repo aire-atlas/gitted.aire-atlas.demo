@@ -4,19 +4,11 @@
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
-SET standard_conforming_strings = off;
+SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET escape_string_warning = off;
 
 SET search_path = public, pg_catalog;
-
---
--- Name: geom_eu34_nuts2006_centres_ogc_fid_seq; Type: SEQUENCE SET; Schema: public; Owner: aire
---
-
-SELECT pg_catalog.setval('geom_eu34_nuts2006_centres_ogc_fid_seq', 1927, true);
-
 
 --
 -- Data for Name: geom_eu34_nuts2006_centres; Type: TABLE DATA; Schema: public; Owner: aire
@@ -1951,6 +1943,13 @@ COPY geom_eu34_nuts2006_centres (ogc_fid, wkb_geometry, id) FROM stdin;
 1926	0101000020DB0B000010031208307C494184E21A2EC52F4941	UKL14     
 1927	0101000020DB0B000054207B3610364A4180CAA9484AC24B41	UKM32     
 \.
+
+
+--
+-- Name: geom_eu34_nuts2006_centres_ogc_fid_seq; Type: SEQUENCE SET; Schema: public; Owner: aire
+--
+
+SELECT pg_catalog.setval('geom_eu34_nuts2006_centres_ogc_fid_seq', 1927, true);
 
 
 --
