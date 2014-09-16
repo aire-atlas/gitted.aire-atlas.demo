@@ -1,2 +1,3 @@
 { "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.ColorFamily", "name" : "_id_" }
 { "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.OgrDataSource", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.OgrLayer", "name" : "_id_" }
