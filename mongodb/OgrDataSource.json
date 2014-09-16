@@ -1,2 +1,17 @@
-{ "_id" : { "$oid" : "4cfceaa44696c16b7b000000" }, "name" : "Base PostGIS", "layerCount" : 8, "database" : "aire", "user" : "aire", "password" : "NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT", "host" : "localhost", "port" : "5432", "module" : "PostgreSql" }
+{ "_id" : { "$oid" : "4cfceaa44696c16b7b000000" }, "name" : "Base PostGIS", "layerCount" : 94, "database" : "aire", "user" : "aire", "password" : "NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT", "host" : "localhost", "port" : "5432", "module" : "PostgreSql" }
+{ "_id" : { "$oid" : "4cfcf48d4696c16e0a010000" }, "name" : "Shapes EU31", "layerCount" : 4, "path" : "shapes/EU31/", "module" : "Generic" }
+{ "_id" : { "$oid" : "4cfcf49d4696c1800a000000" }, "name" : "Shapes EU34", "layerCount" : 4, "path" : "shapes/EU34/", "module" : "Generic" }
 { "_id" : { "$oid" : "4cfcf4c24696c1840a000000" }, "layerCount" : 25, "module" : "Generic", "name" : "Shapes OTHERS", "path" : "shapes/OTHERS/" }
+{ "_id" : { "$oid" : "4d418e504696c12234000000" }, "name" : "World (EIW)", "layerCount" : 2, "path" : "shapes/WORLD_test/geom", "type" : "shapedir", "module" : "Generic" }
+{ "_id" : { "$oid" : "4d418ede4696c1052e000000" }, "name" : "World data", "layerCount" : 1, "path" : "shapes/WORLD_test/data", "type" : "auto", "module" : "Generic" }
+{ "_id" : { "$oid" : "4d552c564696c15d450b0000" }, "name" : "CSV", "layerCount" : 5, "path" : "shapes/csv/", "type" : "auto", "module" : "Generic" }
+{ "_id" : { "$oid" : "4dfb3cab4696c16171050000" }, "name" : "WORLD", "layerCount" : 1, "path" : "shapes/WORLD", "type" : "shapedir", "module" : "Generic" }
+{ "_id" : { "$oid" : "4e0490b64696c1f4120a0000" }, "layerCount" : 20, "module" : "Generic", "name" : "Anamorphoses EU34", "path" : "anamorphoses/EU34_anamorphose/", "type" : "auto" }
+{ "_id" : { "$oid" : "4ee0b1fa4696c18f2a020000" }, "name" : "Anamorphoses EU31", "layerCount" : 7, "path" : "anamorphoses/EU31_anamorphose/", "type" : "shapedir", "module" : "Generic" }
+{ "_id" : { "$oid" : "4ee9fe814696c14c3d090000" }, "name" : "Anamorphoses EU27", "layerCount" : 9, "path" : "anamorphoses/EU27_anamorphose/", "type" : "shapedir", "module" : "Generic" }
+{ "_id" : { "$oid" : "4ffea1d94696c11773060000" }, "name" : "Shapes EU27 NUTS2010", "layerCount" : 5, "path" : "shapes/EU27_NUTS2010", "type" : "auto", "module" : "Generic" }
+{ "_id" : { "$oid" : "4ffea25e4696c1e20e060000" }, "name" : "Shapes EU31 NUTS2010", "layerCount" : 5, "path" : "shapes/EU31_NUTS2010", "type" : "auto", "module" : "Generic" }
+{ "_id" : { "$oid" : "4ffea29b4696c14d0f060000" }, "name" : "Shapes EU34 NUTS2010", "layerCount" : 5, "path" : "shapes/EU34_NUTS2010", "type" : "auto", "module" : "Generic" }
+{ "_id" : { "$oid" : "4ffebb074696c1480f060000" }, "layerCount" : -1, "module" : "Generic", "name" : "CSV2010", "path" : "shapes/csv_2010", "type" : "auto" }
+{ "_id" : { "$oid" : "500d043f4696c1925a000000" }, "layerCount" : -1, "module" : "Generic", "name" : "CSV2_2010", "path" : "shapes/Nouveau dossier/", "type" : "auto" }
+{ "_id" : { "$oid" : "504745c34696c1ac52000000" }, "layerCount" : 6, "module" : "Generic", "name" : "Anamorphoses 2012", "path" : "anamorphoses_2012", "type" : "auto" }

@@ -1,0 +1,8 @@
+{ "_id" : { "$oid" : "4cfdf4694696c1753d000000" }, "position" : 2, "published" : true, "title" : "Démographie" }
+{ "_id" : { "$oid" : "4cfdf4904696c1753d010000" }, "position" : 3, "published" : true, "title" : "Économie" }
+{ "_id" : { "$oid" : "4cfdf4b44696c18434000000" }, "position" : 6, "published" : true, "title" : "Environment" }
+{ "_id" : { "$oid" : "4cfdf4ba4696c1753d020000" }, "position" : 7, "published" : false, "title" : "Généralités" }
+{ "_id" : { "$oid" : "4f27ccd94696c15203030000" }, "position" : 4, "published" : true, "title" : "Education" }
+{ "_id" : { "$oid" : "4f27cceb4696c17f6c090000" }, "position" : 4, "published" : true, "title" : "Labour Market" }
+{ "_id" : { "$oid" : "4f3384204696c1ba4d000000" }, "position" : 0, "title" : "Test Monde", "published" : false }
+{ "_id" : { "$oid" : "500d0a364696c1f350000000" }, "position" : 1, "title" : "Nouveautés (Nuts 2010)", "published" : false }

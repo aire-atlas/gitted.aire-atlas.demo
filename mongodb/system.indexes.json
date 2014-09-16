@@ -1,3 +1,10 @@
 { "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.ColorFamily", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.Display", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.GdalDataset", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.Map", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.MapCategory", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.MapCollection", "name" : "_id_" }
 { "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.OgrDataSource", "name" : "_id_" }
 { "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.OgrLayer", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.Template", "name" : "_id_" }
+{ "v" : 1, "key" : { "_id" : 1 }, "ns" : "aire_test.Translation", "name" : "_id_" }
