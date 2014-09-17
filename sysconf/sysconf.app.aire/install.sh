@@ -41,7 +41,7 @@ _aire_install()
     local _pg_config=/etc/postgresql/9.1/main/postgresql.conf
     if [ -f $_pg_config ]; then
         rm -f $_pg_config
-        l -s ../../../postgresql-comon/postgresql.conf $_pg_config
+        ln -s ../../../postgresql-common/postgresql.conf $_pg_config
     fi
 
     # local _line="host all all 0.0.0.0/0 trust"
