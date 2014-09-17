@@ -18,6 +18,11 @@ sync.
   
 ## Install & start the base atlas
 
+**You don't need to be root!** but you need [Git](http://git-scm.com/)
+and [LXC](https://linuxcontainers.org/) installed on your Linux
+system. See [Gitted](https://github.com/geonef/sysconf.gitted) for
+more info.
+
 ```
 git clone https://github.com/aire-atlas/atlas-base.git && cd atlas-base
 sysconf/gitted-client register && sysconf/gitted-client add vm-atlas-base
@@ -41,8 +46,3 @@ vm-atlas-base  RUNNING  10.0.3.254  -     NO
 That output indicates the IP of the atlas:
 * atlas homepage: http://10.0.3.254/
 * atlas admin screen : http://10.0.3.254/admin
-
-
-## Make your own atlas
-
-
