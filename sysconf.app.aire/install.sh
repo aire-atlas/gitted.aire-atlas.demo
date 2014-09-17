@@ -43,6 +43,7 @@ _aire_install()
         rm -f $_pg_config
         echo "Setting symlink for: $_pg_config"
         ln -s ../../../postgresql-common/postgresql.conf $_pg_config
+        service postgresql restart
     fi
 
     # local _line="host all all 0.0.0.0/0 trust"
