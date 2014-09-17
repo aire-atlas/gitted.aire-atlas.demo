@@ -11,33 +11,27 @@ Beyond a simple consultation tool, the atlas allows an acces to multiple represe
 
 ## This is only the installer
 
-This repository _sysconf.app.aire_ is just part of the project and provides :
+This sub-repository _sysconf.app.aire_ is just part of the project and provides :
 * The *system setup* script [install.sh](./install.sh), designed to work on Debian-compatible GNU/Linux systems
 * Documentation and tips about the installation and maintenacne of the AIRE atlas
 * The *manager* script [tree/usr/bin/aire-manager](./tree/usr/bin/aire-manager) which manages installation, update and troubleshooting of the various website instances configured to run on the system
 * Initial datasets, in [tree/usr/share/aire/data](./tree/usr/share/aire/data)
 
 
-## Quick installation on a Debian/Ubuntu system
+## Easy use through the _Gitted_ version of AIRE
 
-Run as root:
-```shell
-apt-get install sudo curl git && curl https://raw.githubusercontent.com/geonef/sysconf.base/master/tree/usr/bin/sysconf | bash -s init https://github.com/aire-atlas/sysconf.app.aire.git compile install update
-```
+For normal use cases you don't need to manipulate this directly. See
+the
+[AIRE install instructions](https://github.com/aire-atlas/aire-web-app/wiki/Installation)
+for the commands.
 
-```shell
-sudo aire-manager install demo
-```
 
-That's all!
-How can access AIRE by pointer a web browser to http://127.0.0.1/
 
-## Extended instructions 
+## the ```aire-manager``` utility
 
-* [System setting-up](README.SETUP.md) to prepare the Linux system with all required dependencies
-* [Managing instances](README.INSTANCES.md) to manage single or multiple AIRE atlases
-* [Ready-to-use virtualized environments](README.SETUP.VIRTUAL.md) for some hints for installing within
-  virtual machine and container
+* [AIRE instances](doc/aire-instance.md)
+* [AIRE instances configuration options](doc/aire-instance-settings.md)
+
 
 ## Notes
 
