@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+
+GLXC_DATA_PATH=mongodb-json GLXC_MONGODB_DATABASE=aire_test GLXC_MONGODB_FORMAT=json \
+    /usr/share/glxc/export/mongodb
