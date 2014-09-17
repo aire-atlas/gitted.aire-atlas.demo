@@ -38,6 +38,18 @@ _aire_install()
     #     # sleep 2
     # }
 
+    local _pg_config=/etc/postgresql/9.1/main/postgresql.conf
+    if [ -f $_pg_config ]; then
+        rm -f $_pg_config
+        l -s ../../../postgresql-comon/postgresql.conf $_pg_config
+    fi
+
+    # local _line="host all all 0.0.0.0/0 trust"
+    # local _pg_config_path=/etc/postgresql/9.1/main
+    # if ! grep -q "$_line" $_pg_config_path/pg_hba.conf; then
+    #     echo -e "# Added by sysconf.app.aire/install.sh\n$_line" >>$_pg_config_path/pg_hba.conf
+    # fi
+
     # setup MongoDB replica
     if ! echo -e "use local\nshow collections" | mongo | grep -q oplog.rs; then
         echo "Activating the MongoDB replica..."
