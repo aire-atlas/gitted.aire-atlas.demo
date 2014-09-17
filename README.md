@@ -11,7 +11,7 @@ sync.
 * [GIT](http://git-scm.com/) is the #1 distributed version control
   system
 
-* [GITTED](https://github.com/geonef/gitted) is a shell-based tool
+* [GITTED](https://github.com/geonef/sysconf.gitted) is a shell-based tool
   that let you manage the atlas through ```git pull``` and ```git
   push``` commands
   
