@@ -1,4 +1,4 @@
-{ "_id" : { "$oid" : "4cfceaa44696c16b7b000000" }, "name" : "Base PostGIS", "layerCount" : 94, "database" : "aire", "user" : "aire", "password" : "NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT", "host" : "localhost", "port" : "5432", "module" : "PostgreSql" }
+{ "_id" : { "$oid" : "4cfceaa44696c16b7b000000" }, "name" : "Base PostGIS", "layerCount" : 14, "database" : "aire", "user" : "aire", "password" : "NNrPLvp1aAhsWvLGpdpQ1xFjDAv2iTHT", "host" : "localhost", "port" : "5432", "module" : "PostgreSql" }
 { "_id" : { "$oid" : "4cfcf48d4696c16e0a010000" }, "name" : "Shapes EU31", "layerCount" : 4, "path" : "shapes/EU31/", "module" : "Generic" }
 { "_id" : { "$oid" : "4cfcf49d4696c1800a000000" }, "name" : "Shapes EU34", "layerCount" : 4, "path" : "shapes/EU34/", "module" : "Generic" }
 { "_id" : { "$oid" : "4cfcf4c24696c1840a000000" }, "layerCount" : 25, "module" : "Generic", "name" : "Shapes OTHERS", "path" : "shapes/OTHERS/" }
